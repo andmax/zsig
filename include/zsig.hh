@@ -77,8 +77,8 @@ Main Code:
 
 Project Supervisor:
 \par
-\htmlonly <a href="http://lvelho.impa.br" target="_blank">Luiz Velho</a> \endhtmlonly
-\latexonly \href{http://lvelho.impa.br}{Luiz Velho} \endlatexonly
+\htmlonly <a href="http://www.cs.umd.edu/~varshney" target="_blank">Amitabh Varshney</a> \endhtmlonly
+\latexonly \href{http://www.cs.umd.edu/~varshney}{Amitabh Varshney} \endlatexonly
 
 */
 

@@ -1,0 +1,37 @@
+*************************************************************************
+**                                                                     **
+**                zsig - Zernike-based Vertex Signatures               **
+**                                                                     **
+**                              README File                            **
+**                                                                     **
+*************************************************************************
+
+    zsig is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    zsig is distributed in the hope that it will be useful, but
+    WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see
+    <http://www.gnu.org/licenses/>.
+
+Abstract:
+
+The Zernike-based Vertex Signatures (ZSIG) project is a compound of
+C++-source codes to compute vertex signatures over a given meshed
+surface. The signatures can be used to propagate computations from one
+part of the mesh to many other similar regions. Each vertex signature
+is a set of coordinates embedding the corresponding vertex in the
+feature space. This space has the interesting property of grouping
+similar vertices, that is similarity-based processing is reduced to
+searching nearest neighbours in this space.
+
+Instalation:
+
+    zsig code was written in C++ and tested on Linux platform using gcc
+    4.4.3 of the Ubuntu distribution.
