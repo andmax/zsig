@@ -87,7 +87,7 @@ Project Supervisor:
 
 //== INCLUDES =================================================================
 
-//#include <signature.hh>
+#include <zernikepolynomialt.hh>
 
 //=============================================================================
 #endif // ZSIG_HH
