@@ -3,8 +3,8 @@
 #
 project(zsig)
 
-cmake_minimum_required(VERSION 2.4)
-cmake_policy(VERSION 2.4)
+cmake_minimum_required(VERSION 2.6)
+cmake_policy(VERSION 2.6)
 set(CMAKE_CXX_COMPILER g++)
 
 message(STATUS "Building in ${BUILDENV} Environment")
@@ -14,11 +14,11 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 set(CMAKE_VERBOSE_MAKEFILE TRUE)
 set(CMAKE_BUILD_TYPE Release)
 
-if( CMAKE_SIZEOF_VOID_P MATCHES 4 ) # 32-bit O.S.
-  set(BASE_FLAGS "-Wno-deprecated -march=native -mfpmath=sse -fopenmp")
-else( CMAKE_SIZEOF_VOID_P MATCHES 4 ) # 64-bit O.S.
-  set(BASE_FLAGS "-Wno-deprecated -m64 -march=native -mfpmath=sse -fopenmp")
-endif( CMAKE_SIZEOF_VOID_P MATCHES 4 )
+set(BASE_FLAGS "-Wno-deprecated -march=native -mfpmath=sse -fopenmp")
+
+if( CMAKE_SIZEOF_VOID_P MATCHES 8 ) # 64-bit O.S.
+  set(BASE_FLAGS "${BASE_FLAGS} -m64")
+endif()
 
 set(RELEASE_FLAGS "-O3 -DNDEBUG -ffast-math -Wall -Wno-parentheses -funroll-loops -frounding-math -fomit-frame-pointer -ftree-vectorize -fno-math-errno -funsafe-math-optimizations -Wall -Wextra -Wno-parentheses -Wno-unused -Wno-sign-compare -Wno-unknown-pragmas")
 set(DEBUG_FLAGS "-O0 -ggdb")
