@@ -34,7 +34,7 @@ T fac( const int& _n ) {
 	return f;
 }
 
-/** @brief Compute Radial Polynomial: \f$R_{pq} ( \rho )\f$
+/** @brief Compute Radial Polynomial: \f$R_{p}^{q}(\rho)\f$
  *  @see ZernikePolynomialsBasisT
  *  This function computes the value returned by equation (2) from
  *  [Maximo, 2011], that is the Radial Polynomial associated with order
@@ -49,7 +49,7 @@ T fac( const int& _n ) {
  *  @param _p Radial order
  *  @param _q Frequency repetition
  *  @param _r Domain radius \f$\rho\f$ to compute the polynomial
- *  @return Radial Polynomial \f$R_{pq} ( \rho )\f$
+ *  @return Radial Polynomial \f$R_{p}^{q}(\rho)\f$
  *  @tparam T defines number precision
  */
 template< class T >
@@ -74,7 +74,7 @@ T compute_R( const unsigned& _p,
 
 }
 
-/** @brief Compute Zernike Polynomial: \f$V_{pq} ( \rho, \theta )\f$
+/** @brief Compute Zernike Polynomial: \f$V_{p}^{q}(\rho, \theta)\f$
  *  @see ZernikePolynomialsBasisT
  *  This function computes the value returned by equation (1) from
  *  [Maximo, 2011], that is the Zernike Polynomial associated with
@@ -88,7 +88,7 @@ T compute_R( const unsigned& _p,
  *  @param _q Frequency repetition
  *  @param _r Domain radius \f$\rho\f$ to compute the polynomial
  *  @param _t Domain angle \f$\theta\f$ to compute the polynomial
- *  @return Zernike Polynomial \f$V_{pq} ( \rho, \theta )\f$
+ *  @return Zernike Polynomial \f$V_{p}^{q}(\rho, \theta)\f$
  *  @tparam T defines number precision
  */
 template< class T >
@@ -145,7 +145,7 @@ std::complex< T > compute_V( const unsigned& _p,
  *  @note For higher order Zernike Polynomials high-precision number
  *  type is required.  For instance, eighth-order basis reaches big
  *  numbers when computing the factorial for the radial polynomial
- *  \f$R_{pq}( \rho )\f$ given in equation (2) of [Maximo, 2011] and
+ *  \f$R_{p}^{q}(\rho)\f$ given in equation (2) of [Maximo, 2011] and
  *  computed in @see compute_R.
  *  @tparam O defines Zernike target radial order
  *  @tparam T defines number precision
@@ -159,7 +159,11 @@ public:
 	typedef std::complex< T > value_type; ///< Polynomial value type
 	typedef std::vector< value_type > radial_polynomial; ///< Radial polynomial
 
-	/// Default Constructor
+	/** @brief Default Constructor
+	 *  This class does not store: q[-4, -2, 0, 2, 4] instead it
+	 *  stores only: q[0, 2, 4]; since the complex conjugate of q
+	 *  and -q are the same V_{p}^{q} = V*_{p}^{-q}.
+	 */
 	ZernikePolynomialsBasisT() : pol(Order+1) {
 		for (unsigned p = 0; p <= Order; ++p) pol[p].resize( 1+p/2 );
 	}
@@ -169,7 +173,7 @@ public:
 	 */
 	const radial_polynomial& operator [] (const unsigned& _p) const { return this->pol[_p]; }
 
-	/** @brief Read/write operator
+	/** @brief Read/write operator of each radial polynomial
 	 *  @param _p Radial order
 	 *  @return Radial polynomial of order _p
 	 */
@@ -188,7 +192,7 @@ public:
 
 	/** @brief Output stream operator
 	 *  @param out Output stream
-	 *  @param _z Zernike Polynomial to output
+	 *  @param _z Zernike Polynomials Basis to output
 	 *  @return Output stream
 	 */
 	friend std::ostream& operator << (std::ostream& out, const zpolbasis_type& _z) {
@@ -202,7 +206,7 @@ public:
 
 private:
 
-	std::vector< radial_polynomial > pol;
+	std::vector< radial_polynomial > pol; ///< Vector of radial polynomials forming the basis
 
 };
 /** @example example_zpol.cc
@@ -219,18 +223,24 @@ private:
  *  from [Maximo, 2011] (the discrete version of equation (3)), that
  *  is the Zernike basis \f$(\bar{V_{p}^{q}})[x,y]\f$ associated with
  *  all possible orders \f$p\f$ and repetitions \f$q\f$ related with
- *  the target function \f$f(x,y)\f$ to be projected as follows:
+ *  the target function \f$f(x,y)\f$ to be projected, as follows:
  *  \f{
 \begin{equation}
   z_{p}^{q}(f) = \frac{p+1}{\pi} \sum_{ (x,y) \in \mathbf{S} }
   (\bar{V_{p}}^{q})[x,y] f[x,y]
 \end{equation}
  *  \f}
- *  Instead of computing: q[-4, -2, 0, 2, 4] compute only: q[0, 2, 4]
- *  since the conjugate of q and -q are the same V_{pq} = V*_{p{-q}}.
+ *  The domain of the function \f$f(x,y)\f$ is considered to be a
+ *  discrete grid (of a given size) in the range [-1, 1] and it is
+ *  converted to polar coordinates \f$(\rho, \theta)\f$, evaluating
+ *  only in the unit circle (where the Zernike basis is defined)
+ *  centered at the origin.
+ *  @note This function computes only: q[0, 2, 4] (i.e. the indices
+ *  qi[0, 1, 2]) and not: q[-4, -2, 0, 2, 4]; since the conjugate of q
+ *  and -q are the same V_{p}^{q} = V*_{p}^{-q}.
  *  @param _zpb Zernike Polynomials Basis for each [x, y]
- *  @param _szx Size in the x-direction
- *  @param _szy Size in the y-direction
+ *  @param _szx Domain size of the x-direction
+ *  @param _szy Domain size of the y-direction
  *  @tparam O defines Zernike target radial order
  *  @tparam T defines number precision
  */
