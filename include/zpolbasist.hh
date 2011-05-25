@@ -53,16 +53,25 @@ T fac( const int& _n ) {
  *  @tparam T defines number precision
  */
 template< class T >
-T compute_R( const unsigned& _p, const int& _q, const T& _r ) {
-	T sum = (T)0;
+T compute_R( const unsigned& _p,
+	     const int& _q,
+	     const T& _r ) {
+
 	int a, b, c, d;
+	T sum = (T)0;
+
 	for (int k = (_q<0?-_q:_q); k <= _p; k += 2) {
+
 		a = (_p - k) / 2; b = (_p + k) / 2;
 		c = (k - _q) / 2; d = (k + _q) / 2;
+
 		sum += ( ( pow( (T)-1.0, (T)a ) * fac<T>(b) ) /
 			 ( fac<T>(a) * fac<T>(c) * fac<T>(d) ) ) * pow( _r, (T)k );
+
 	}
+
 	return sum;
+
 }
 
 /** @brief Compute Zernike Polynomial: \f$V_{pq} ( \rho, \theta )\f$
@@ -83,8 +92,13 @@ T compute_R( const unsigned& _p, const int& _q, const T& _r ) {
  *  @tparam T defines number precision
  */
 template< class T >
-std::complex< T > compute_V( const unsigned& _p, const int& _q, const T& _r, const T& _t ) {
+std::complex< T > compute_V( const unsigned& _p,
+			     const int& _q,
+			     const T& _r,
+			     const T& _t ) {
+
 	return std::polar( compute_R<T>( _p, _q, _r), _q * _t );
+
 }
 
 //== CLASS DEFINITION =========================================================
@@ -141,10 +155,8 @@ class ZernikePolynomialsBasisT {
 
 public:
 
-	typedef T number_type; ///< Real and imaginary number type
-
-	typedef ZernikePolynomialsBasisT< Order, number_type > zpolbasis_type; ///< This class type
-	typedef std::complex< number_type > value_type; ///< Polynomial value type
+	typedef ZernikePolynomialsBasisT< Order, T > zpolbasis_type; ///< This class type
+	typedef std::complex< T > value_type; ///< Polynomial value type
 	typedef std::vector< value_type > radial_polynomial; ///< Radial polynomial
 
 	/// Default Constructor
@@ -181,10 +193,9 @@ public:
 	 */
 	friend std::ostream& operator << (std::ostream& out, const zpolbasis_type& _z) {
 		for (unsigned p = 0; p <= Order; ++p) {
-			out << "[" << _z[p][0];
+			out << _z[p][0];
 			for (unsigned qi = 1; qi <= p/2; ++qi)
 				out << " " << _z[p][qi];
-			out << "]";
 		}
 		return out;
 	}
@@ -196,7 +207,7 @@ private:
 };
 /** @example example_zpol.cc
  *  This is an example of how to use the Zernike Polynomials
- *  Orthogonal Basis class.
+ *  Orthogonal Basis class and auxiliary functions.
  *  @see zpolbasist.hh
  */
 
@@ -215,36 +226,33 @@ private:
   (\bar{V_{p}}^{q})[x,y] f[x,y]
 \end{equation}
  *  \f}
- *  @param 
- *  @tparam P ... from @see ZernikePolynomialsBasisT
- *  @tparam Order ...
- *  @tparam DX ...
- *  @tparam DY ...
+ *  Instead of computing: q[-4, -2, 0, 2, 4] compute only: q[0, 2, 4]
+ *  since the conjugate of q and -q are the same V_{pq} = V*_{p{-q}}.
+ *  @param _zpb Zernike Polynomials Basis for each [x, y]
+ *  @param _szx Size in the x-direction
+ *  @param _szy Size in the y-direction
+ *  @tparam O defines Zernike target radial order
+ *  @tparam T defines number precision
  */
-template< class P, unsigned Order, unsigned DX, unsigned DY >
-void compute_basis( P (&_conj_V) [DX][DY] ) {
+template< unsigned Order, class T >
+void compute_basis( ZernikePolynomialsBasisT< Order, T > **_zpb,
+		    const unsigned int& _szx,
+		    const unsigned int& _szy ) {
 
-	typedef typename P::number_type Number;
+	T x, y, r, t; ///< (x, y) cartesian and (r, t) polar coordinates
 
-	/// Instead of computing: q[-4, -2, 0, 2, 4] only compute:
-	/// q[0, 2, 4] since the conjugate of q and -q are the same
-	/// V_{pq} = V*_{p{-q}}
+	for (unsigned gx = 0; gx < _szx; ++gx) {
 
-	Number x, y, r, t;
+		x = ( (T)2 * gx + (T)1 ) / (T)_szx - (T)1;
 
-	for (unsigned gx = 0; gx < DX; ++gx) {
+		for (unsigned gy = 0; gy < _szy; ++gy) {
 
-		x = ( (Number)2 * gx + (Number)1 ) / (Number)DX - (Number)1;
+			y = ( (T)2 * gy + (T)1 ) / (T)_szy - (T)1;
 
-		for (unsigned gy = 0; gy < DY; ++gy) {
+			r = (T)sqrt( x*x + y*y );
+			if( r > 1.0 ) continue; ///< outside unit circle is zero
 
-			y = ( (Number)2 * gy + (Number)1 ) / (Number)DY - (Number)1;
-
-			/// Transform (x, y) to polar coordinates (r, t)
-			r = (Number)sqrt( x*x + y*y );
-			if( r > 1.0 ) continue; ///< Outside circle is zero
-
-			t = (Number)atan2( y, x );
+			t = (T)atan2( y, x );
 
 			for (int p = 0; p <= Order; ++p) {
 
@@ -252,7 +260,7 @@ void compute_basis( P (&_conj_V) [DX][DY] ) {
 
 				for (int q = p % 2; q <= p; q += 2, qi++) {
 
-					_conj_V[gx][gy][p][qi] = compute_V(p, q, r, t);
+					_zpb[gx][gy][p][qi] = std::conj( compute_V(p, q, r, t) );
 
 				}
 

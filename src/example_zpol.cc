@@ -7,13 +7,11 @@ typedef zsig::ZernikePolynomialsBasisT<> zpolbasis_type;
 
 int main( int argc, char *argv[] ) {
 
-	zpolbasis_type zpol;
+	zpolbasis_type **V = new zpolbasis_type*[16];
+	for (unsigned i = 0; i < 16; ++i)
+		V[i] = new zpolbasis_type[16];
 
-	zpolbasis_type V[16][16];
-
-	zsig::compute_basis< zpolbasis_type, 8, 16, 16 >( V );
-
-	std::cout << "zpol: " << zpol << "\n";
+	zsig::compute_basis( V, 16, 16 );
 
 	std::ofstream out("zpol_test.txt");
 
@@ -25,9 +23,13 @@ int main( int argc, char *argv[] ) {
 
 	std::ifstream in("zpol_test.txt");
 
-	in >> zpol;
+	zpolbasis_type Vr[16][16];
 
-	std::cout << "zpol: " << zpol << "\n";
+	for (unsigned gx = 0; gx < 16; ++gx)
+		for (unsigned gy = 0; gy < 16; ++gy)
+			in >> Vr[gx][gy];
+
+	std::cout << "mid: " << Vr[8][8] << "\n";
 
 	in.close();
 
