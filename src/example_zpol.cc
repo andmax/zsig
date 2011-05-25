@@ -13,7 +13,7 @@
 
 typedef zsig::ZernikePolynomialsBasisT< ZERNIKE_ORDER, ZERNIKE_VALUE_TYPE > zpolbasis_type;
 
-typedef unsigned char ppmimg [ DOMAIN_GRID_X * DOMAIN_GRID_Y * 3 ];
+typedef unsigned char ppmimg [DOMAIN_GRID_X * DOMAIN_GRID_Y * 3];
 
 /// Convert hue, saturation, value to red, green, blue colors
 void hsv_to_rgb( const ZERNIKE_VALUE_TYPE& h,
@@ -85,7 +85,8 @@ int main( int argc, char *argv[] ) {
 		for (unsigned qi = 0; qi <= p/2; ++qi) {
 
 			std::stringstream ss;
-			ss << "Zimg_" << p << "_" << qi*2 << ".ppm";
+			if( p % 2 == 0 ) ss << "Zimg_" << p << "_" << qi*2 << ".ppm";
+			else ss << "Zimg_" << p << "_" << qi*2+1 << ".ppm";
 			std::ofstream outppm(ss.str().c_str());
 
 			std::cout << "[zsig] Making image: " << ss.str() << "\n";
