@@ -1,0 +1,26 @@
+Compute Radial Polynomial: $R_{p}^{q}(\rho)$
+
+This function computes the value returned by equation (1) from \mbox{[}Maximo:2011\mbox{]}, that is the Radial Polynomial associated with order $p$ and repetition $q$ as follows:
+
+\begin{equation} R_{p}^{q}(\rho) = \mathop{\sum_{k=|q|}^{p}}_{|p-q| \mathrm{even}} \frac{(-1)^{\frac{p-k}{2}} \frac{p+k}{2}!}{\frac{p-k}{2}! \frac{k-q}{2}! \frac{k+q}{2}!}\rho^{k} \label{eq:Rpq} \end{equation}
+
+
+\begin{DoxyParams}{Parameters}
+{\em \_\-p} & Radial order \\
+\hline
+{\em \_\-q} & Frequency repetition \\
+\hline
+{\em \_\-r} & Domain radius $\rho$ to compute the polynomial \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Radial Polynomial $R_{p}^{q}(\rho)$ 
+\end{DoxyReturn}
+
+\begin{DoxyTemplParams}{Template Parameters}
+{\em T} & defines number precision \\
+\hline
+\end{DoxyTemplParams}
+\begin{DoxySeeAlso}{See also}
+\hyperlink{classzsig_1_1ZernikePolynomialsBasisT}{ZernikePolynomialsBasisT} 
+\end{DoxySeeAlso}

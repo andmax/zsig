@@ -31,7 +31,11 @@ feature space. This space has the interesting property of grouping
 similar vertices, that is similarity-based processing is reduced to
 searching nearest neighbours in this space.
 
-Instalation:
+Installation:
 
     zsig code was written in C++ and tested on Linux platform using gcc
     4.4.3 of the Ubuntu distribution.
+
+    The code is still in polishing process; the Zernike code is
+    somewhat ok, but I still need to polish the Signatures code and
+    upload it to this repository.

@@ -1,0 +1,16 @@
+\form#0:$n!$
+\form#1:$R_{p}^{q}(\rho)$
+\form#2:$p$
+\form#3:$q$
+\form#4:$\rho$
+\form#5:$V_{p}^{q}(\rho, \theta)$
+\form#6:$\theta$
+\form#7:$(V_{p}^{q})[x,y]$
+\form#8:$f(x,y)$
+\form#9:$(\rho, \theta)$
+\form#10:$(\bar{V_{p}^{q}})[x,y]$
+\form#11:$(z_{p}^{q}(f))[x,y]$
+\form#12:\begin{equation} R_{p}^{q}(\rho) = \mathop{\sum_{k=|q|}^{p}}_{|p-q| \mathrm{even}} \frac{(-1)^{\frac{p-k}{2}} \frac{p+k}{2}!}{\frac{p-k}{2}! \frac{k-q}{2}! \frac{k+q}{2}!}\rho^{k} \end{equation}
+\form#13:\begin{equation} V_{p}^{q}(\rho, \theta) = R_{p}^{q}(\rho) e^{iq\theta} \end{equation}
+\form#14:\begin{equation} z_{p}^{q}(f) = \frac{p+1}{\pi} \sum_{ (x,y) \in \mathbf{S} } (\bar{V_{p}}^{q})[x,y] f[x,y] \end{equation}
+\form#15:\begin{equation} R_{p}^{q}(\rho) = \mathop{\sum_{k=|q|}^{p}}_{|p-q| \mathrm{even}} \frac{(-1)^{\frac{p-k}{2}} \frac{p+k}{2}!}{\frac{p-k}{2}! \frac{k-q}{2}! \frac{k+q}{2}!}\rho^{k} \label{eq:Rpq} \end{equation}
