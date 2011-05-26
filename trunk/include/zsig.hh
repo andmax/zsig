@@ -22,8 +22,8 @@ The ZSIG library is based on the paper: "A Robust and Rotationally
 Invariant Local Surface Descriptor with Applications to Non-local Mesh
 Processing" available in:
 
-\htmlonly <a href="http://dx.doi.org/10.1016/j.gmod.2011.05.002" target="_blank">DOI</a> \endhtmlonly
-\latexonly \href{http://dx.doi.org/10.1016/j.gmod.2011.05.002}{DOI} \endlatexonly
+\htmlonly <a href="http://dx.doi.org/10.1016/j.gmod.2011.05.002" target="_blank">DOI: 10.1016/j.gmod.2011.05.002</a> \endhtmlonly
+\latexonly \href{http://dx.doi.org/10.1016/j.gmod.2011.05.002}{DOI: 10.1016/j.gmod.2011.05.002} \endlatexonly
 
 \section structure Library Structure
 
