@@ -15,8 +15,8 @@ typedef zsig::ZernikePolynomialsBasisT< ZERNIKE_ORDER, ZERNIKE_VALUE_TYPE > zpol
 
 typedef unsigned char pgmimg [DOMAIN_GRID_X][DOMAIN_GRID_Y];
 
-/// Generate a vale gray image
-void vale_gray_image( pgmimg& img ) {
+/// Generate a river gray image
+void river_gray_image( pgmimg& img, const bool& rotated = false ) {
 
 	float x, y, r;
 	unsigned char gray;
@@ -32,7 +32,7 @@ void vale_gray_image( pgmimg& img ) {
 			r = (float)sqrt( x*x + y*y );
 
 			if( r < 1.f )
-				gray = (unsigned char)( 255 * r );
+				gray = (unsigned char)( 255 * (rotated?(x*x):(y*y)) );
 			else
 				gray = 0.f;
 
@@ -63,7 +63,8 @@ int main( int argc, char *argv[] ) {
 	std::vector<float[15]> a;
 
 	std::cout << "[zsig] Usage: " << argv[0] << " [write] (where write = 1 outputs all images as ppm)\n"
-		  << "[zsig] Second ZSIG example\n[zsig] Allocating memory for Zernike Polynomials Basis\n"
+		  << "[zsig] Example ** 2 ** Project / Reconstruct / Compare\n"
+		  << "[zsig] Allocating memory for Zernike Polynomials Basis\n"
 		  << "[zsig] The domain grid is: " << DOMAIN_GRID_X << " x " << DOMAIN_GRID_Y
 		  << " with Zernike Order = " << ZERNIKE_ORDER
 		  << " and each value type = " << sizeof(ZERNIKE_VALUE_TYPE) << " Bytes\n";
@@ -78,47 +79,47 @@ int main( int argc, char *argv[] ) {
 
 	zsig::compute_basis( ZernikeBasis, DOMAIN_GRID_X, DOMAIN_GRID_Y );
 
-	std::cout << "[zsig] Generating vale gray image\n";
+	std::cout << "[zsig] Generating river gray image\n";
 
-	pgmimg hmap;
+	pgmimg river;
 
-	vale_gray_image( hmap );
+	river_gray_image( river );
 
 	if( write_images ) {
 
-		std::cout << "[zsig] Writing generated image: heightmap.pgm\n";
+		std::cout << "[zsig] Writing generated image: river.pgm\n";
 
-		write_pgm( hmap, "heightmap.pgm" );
+		write_pgm( river, "river.pgm" );
 
 	}
 
 	std::cout << "[zsig] Converting it to Zernike coefficients\n";
 
-	ZERNIKE_VALUE_TYPE **f_hmap = new ZERNIKE_VALUE_TYPE*[DOMAIN_GRID_X];
+	ZERNIKE_VALUE_TYPE **f_river = new ZERNIKE_VALUE_TYPE*[DOMAIN_GRID_X];
 
 	for (unsigned gx = 0; gx < DOMAIN_GRID_X; ++gx) {
 
-		f_hmap[gx] = new ZERNIKE_VALUE_TYPE[DOMAIN_GRID_Y];
+		f_river[gx] = new ZERNIKE_VALUE_TYPE[DOMAIN_GRID_Y];
 
 		for (unsigned gy = 0; gy < DOMAIN_GRID_Y; ++gy) {
 
-			f_hmap[gx][gy] = (ZERNIKE_VALUE_TYPE)( hmap[gx][gy] / 255.0 );
+			f_river[gx][gy] = (ZERNIKE_VALUE_TYPE)( river[gx][gy] / 255.0 );
 
 		}
 
 	}
 
-	zpolbasis_type Zhmap;
+	zpolbasis_type Zriver;
 
-	Zhmap.project( f_hmap, ZernikeBasis, DOMAIN_GRID_X, DOMAIN_GRID_Y );
+	Zriver.project( f_river, ZernikeBasis, DOMAIN_GRID_X, DOMAIN_GRID_Y );
 
 	std::cout << "[zsig] Reconstructing image from Zernike coefficients\n";
 
 	for (unsigned gx = 0; gx < DOMAIN_GRID_X; ++gx)
 		for (unsigned gy = 0; gy < DOMAIN_GRID_Y; ++gy)
-			f_hmap[gx][gy] = (ZERNIKE_VALUE_TYPE)0;
+			f_river[gx][gy] = (ZERNIKE_VALUE_TYPE)0;
 
-	Zhmap.reconstruct( f_hmap, ZernikeBasis, DOMAIN_GRID_X, DOMAIN_GRID_Y );
+	Zriver.reconstruct( f_river, ZernikeBasis, DOMAIN_GRID_X, DOMAIN_GRID_Y );
 
 	// min/max scalar values
 	ZERNIKE_VALUE_TYPE mins = std::numeric_limits< ZERNIKE_VALUE_TYPE >::max(),
@@ -128,10 +129,10 @@ int main( int argc, char *argv[] ) {
 
 		for (unsigned gy = 0; gy < DOMAIN_GRID_Y; ++gy) {
 
-			if( f_hmap[gx][gy] == 0 ) continue;
+			if( f_river[gx][gy] == 0 ) continue;
 
-			mins = std::min( mins, f_hmap[gx][gy] );
-			maxs = std::max( maxs, f_hmap[gx][gy] );
+			mins = std::min( mins, f_river[gx][gy] );
+			maxs = std::max( maxs, f_river[gx][gy] );
 
 		}
 
@@ -141,9 +142,9 @@ int main( int argc, char *argv[] ) {
 
 		for (unsigned gy = 0; gy < DOMAIN_GRID_Y; ++gy) {
 
-			if( f_hmap[gx][gy] == 0 ) { hmap[gx][gy] = 0; continue; }
+			if( f_river[gx][gy] == 0 ) { river[gx][gy] = 0; continue; }
 
-			hmap[gx][gy] = (unsigned char)( 255 * (f_hmap[gx][gy] - mins) / (maxs - mins) );
+			river[gx][gy] = (unsigned char)( 255 * (f_river[gx][gy] - mins) / (maxs - mins) );
 
 		}
 
@@ -151,11 +152,39 @@ int main( int argc, char *argv[] ) {
 
 	if( write_images ) {
 
-		std::cout << "[zsig] Writing reconstructed image: reconstructed.pgm\n";
+		std::cout << "[zsig] Writing reconstructed river gray image: recon_river.pgm\n";
 
-		write_pgm( hmap, "reconstructed.pgm" );
+		write_pgm( river, "recon_river.pgm" );
 
 	}
+
+	std::cout << "[zsig] Generating rotated river gray image\n";
+
+	river_gray_image( river, true );
+
+	if( write_images ) {
+
+		std::cout << "[zsig] Writing generated image: rot_river.pgm\n";
+
+		write_pgm( river, "rot_river.pgm" );
+
+	}
+
+	std::cout << "[zsig] Converting it to Zernike coefficients\n";
+
+	for (unsigned gx = 0; gx < DOMAIN_GRID_X; ++gx)
+		for (unsigned gy = 0; gy < DOMAIN_GRID_Y; ++gy)
+			f_river[gx][gy] = (ZERNIKE_VALUE_TYPE)( river[gx][gy] / 255.0 );
+
+	zpolbasis_type Zrotated;
+
+	Zrotated.project( f_river, ZernikeBasis, DOMAIN_GRID_X, DOMAIN_GRID_Y );
+
+	std::cout << "[zsig] Comparing river and rotated Zernike coefficients\n";
+
+	ZERNIKE_VALUE_TYPE dist = Zriver.compare( Zrotated );
+
+	std::cout << "[zsig] Give the Euclidean distance of these two image in Zernike space: " << dist << "\n";
 
 	std::cout << "[zsig] Done!\n";
 
