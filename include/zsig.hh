@@ -43,8 +43,8 @@ more details.
 
 The zsig library can be downloaded from google code following the link:
 
-\htmlonly <a href="https://code.google.com/p/zsig" target="_blank">Google Code</a> \endhtmlonly
-\latexonly \href{https://code.google.com/p/zsig}{Google Code} \endlatexonly
+\htmlonly <a href="https://code.google.com/p/zsig" target="_blank">Google Code: code.google.com/p/zsig</a> \endhtmlonly
+\latexonly \href{https://code.google.com/p/zsig}{Google Code: code.google.com/p/zsig} \endlatexonly
 
 Alternatively, a stable (but not latest) release can be downloaded
 from the following link:
@@ -87,7 +87,8 @@ Project Supervisor:
 
 //== INCLUDES =================================================================
 
-#include <zernikepolynomialt.hh>
+#include <zpolbasist.hh>
+#include <signaturet.hh>
 
 //=============================================================================
 #endif // ZSIG_HH

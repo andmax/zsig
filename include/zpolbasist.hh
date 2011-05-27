@@ -403,29 +403,16 @@ public:
 	/** @brief Read/write operator of each radial polynomial
 	 *
 	 *  @param _p Radial order
-	 *  @return Constant radial polynomial of order _p
-	 */
-	const radial_polynomial& operator[] (const unsigned& _p) const { return this->pol[_p]; }
-
-	/** @brief Read/write operator of each radial polynomial
-	 *
-	 *  @param _p Radial order
 	 *  @return Radial polynomial of order _p
 	 */
-	radial_polynomial& operator[] (const unsigned& _p) { return this->pol[_p]; }
+	radial_polynomial& operator[] ( const unsigned& _p ) { return this->pol[_p]; }
 
-	/** @brief Input stream operator
+	/** @brief Read operator of each radial polynomial
 	 *
-	 *  @param in Input stream
-	 *  @param _z Zernike Polynomials Basis to output
-	 *  @return Input stream
+	 *  @param _p Radial order
+	 *  @return Constant radial polynomial of order _p
 	 */
-	friend std::istream& operator >> (std::istream& in, zpolbasis_type& _z) {
-		for (unsigned p = 0; p <= Order; ++p)
-			for (unsigned qi = 0; qi <= p/2; ++qi)
-				in >> _z[p][qi];
-		return in;
-	}
+	const radial_polynomial& operator[] ( const unsigned& _p ) const { return this->pol[_p]; }
 
 	/** @brief Output stream operator
 	 *
@@ -433,13 +420,28 @@ public:
 	 *  @param _z Zernike Polynomials Basis to output
 	 *  @return Output stream
 	 */
-	friend std::ostream& operator << (std::ostream& out, const zpolbasis_type& _z) {
+	friend std::ostream& operator << ( std::ostream& out,
+					   const zpolbasis_type& _z ) {
 		for (unsigned p = 0; p <= Order; ++p) {
 			out << _z[p][0];
 			for (unsigned qi = 1; qi <= p/2; ++qi)
 				out << " " << _z[p][qi];
 		}
 		return out;
+	}
+
+	/** @brief Input stream operator
+	 *
+	 *  @param in Input stream
+	 *  @param _z Zernike Polynomials Basis to output
+	 *  @return Input stream
+	 */
+	friend std::istream& operator >> ( std::istream& in,
+					   zpolbasis_type& _z ) {
+		for (unsigned p = 0; p <= Order; ++p)
+			for (unsigned qi = 0; qi <= p/2; ++qi)
+				in >> _z[p][qi];
+		return in;
 	}
 
 private:
