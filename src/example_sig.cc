@@ -3,42 +3,43 @@
 
 #include <signaturet.hh>
 
-#define SIGNATURE_VALUE_TYPE float
-
 #define DOMAIN_GRID_X 16
 #define DOMAIN_GRID_Y 16
 
-typedef zsig::SignatureT< DOMAIN_GRID_X, DOMAIN_GRID_Y, SIGNATURE_VALUE_TYPE > signature_type;
+typedef zsig::SignatureT< DOMAIN_GRID_X, DOMAIN_GRID_Y, float > signature_type;
 
-/// Main
+// Main
 int main( int argc, char *argv[] ) {
 
 	std::cout << "[zsig] Usage: " << argv[0] << " [write] (where write = 1 outputs images as ppm)\n"
 		  << "[zsig] Example ** 3 ** Signature\n";
 
-	signature_type s1;
+	zsig::SignaturePlaneT< float > sp;
 
-	for (unsigned i = 0; i < DOMAIN_GRID_X; ++i)
-		for (unsigned j = 0; j < DOMAIN_GRID_X; ++j)
-			if( i == j )
-				s1[i][j] = 1.f;
+	std::cout << sp.origin() << "\n";
 
-	std::ofstream out( "test.txt" );
-
-	out << s1 << "\n";
-
-	out.close();
-
-	std::ifstream in( "test.txt" );
-
-	signature_type s2;
-
-	in >> s2;
-
-	std::cout << s2 << "\n";
+	std::cout << sp.normal() << "\n";
 
 	std::cout << "[zsig] Done!\n";
 
 	return 0;
 
 }
+
+/**
+
+#define ZERNIKE_ORDER 8
+#define ZERNIKE_VALUE_TYPE long double
+
+#define DOMAIN_GRID_X 16
+#define DOMAIN_GRID_Y 16
+
+typedef zsig::ZernikePolynomialsBasisT< ZERNIKE_ORDER, ZERNIKE_VALUE_TYPE > zpolbasis_type;
+
+typedef zsig::SignatureT< DOMAIN_GRID_X, DOMAIN_GRID_Y, zpolbasis_type > zsig_type;
+
+zsig_type ZernikeBasis;
+
+zsig::compute_basis( &ZernikeBasis, DOMAIN_GRID_X, DOMAIN_GRID_Y );
+
+*/

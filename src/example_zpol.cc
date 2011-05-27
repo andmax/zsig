@@ -15,7 +15,7 @@ typedef zsig::ZernikePolynomialsBasisT< ZERNIKE_ORDER, ZERNIKE_VALUE_TYPE > zpol
 
 typedef unsigned char ppmimg [DOMAIN_GRID_X * DOMAIN_GRID_Y * 3];
 
-/// Convert hue, saturation, value to red, green, blue colors
+// Convert hue, saturation, value to red, green, blue colors
 void hsv_to_rgb( const ZERNIKE_VALUE_TYPE& h,
 		 const ZERNIKE_VALUE_TYPE& s,
 		 const ZERNIKE_VALUE_TYPE& v,
@@ -43,7 +43,7 @@ void hsv_to_rgb( const ZERNIKE_VALUE_TYPE& h,
 
 }
 
-/// Convert scalar value to RGB using a color palette
+// Convert scalar value to RGB using a color palette
 void scalar_to_rgb( const ZERNIKE_VALUE_TYPE& scalar,
 		    ZERNIKE_VALUE_TYPE& red,
 		    ZERNIKE_VALUE_TYPE& green,
@@ -59,7 +59,7 @@ void scalar_to_rgb( const ZERNIKE_VALUE_TYPE& scalar,
 
 }
 
-/// Main
+// Main
 int main( int argc, char *argv[] ) {
 
 	std::cout << "[zsig] Usage: " << argv[0] << " [write] (where write = 1 outputs images as ppm)\n"

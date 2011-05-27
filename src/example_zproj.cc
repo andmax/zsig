@@ -14,7 +14,7 @@ typedef zsig::ZernikePolynomialsBasisT< ZERNIKE_ORDER, ZERNIKE_VALUE_TYPE > zpol
 
 typedef unsigned char pgmimg [DOMAIN_GRID_X][DOMAIN_GRID_Y];
 
-/// Generate an example gray image (0: river; 1: rotated river; 2: vale)
+// Generate an example gray image (0: river; 1: rotated river; 2: vale)
 void generate_gray_image( pgmimg& img, const unsigned& example ) {
 
 	float x, y, r;
@@ -44,7 +44,7 @@ void generate_gray_image( pgmimg& img, const unsigned& example ) {
 
 }
 
-/// Write a pgm image file with name fn
+// Write a pgm image file with name fn
 void write_pgm( pgmimg& img, const char *fn ) {
 
 	std::ofstream out(fn);
@@ -57,7 +57,7 @@ void write_pgm( pgmimg& img, const char *fn ) {
 
 }
 
-/// Main
+// Main
 int main( int argc, char *argv[] ) {
 
 	std::vector<float[15]> a;
