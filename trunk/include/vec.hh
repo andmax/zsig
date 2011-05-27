@@ -47,6 +47,11 @@ public:
 	 */
 	vec( const vec_type& _v ) { *this = _v; }
 
+	/** Constructor from scalar value
+	 *  @param _s Scalar value to set all coordinates
+	 */
+	vec( const T& _s ) { *this = _s; }
+
 	/// Destructor
 	~vec() { }
 
