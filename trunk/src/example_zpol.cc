@@ -62,7 +62,7 @@ void scalar_to_rgb( const ZERNIKE_VALUE_TYPE& scalar,
 /// Main
 int main( int argc, char *argv[] ) {
 
-	std::cout << "[zsig] Usage: " << argv[0] << " [write] (where write = 1 outputs Zernike images as ppm)\n"
+	std::cout << "[zsig] Usage: " << argv[0] << " [write] (where write = 1 outputs images as ppm)\n"
 		  << "[zsig] Example ** 1 ** Building Zernike Basis\n"
 		  << "[zsig] Allocating memory for Zernike Polynomials Basis\n"
 		  << "[zsig] The domain grid is: " << DOMAIN_GRID_X << " x " << DOMAIN_GRID_Y
