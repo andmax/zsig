@@ -426,6 +426,7 @@ public:
 			out << _z[p][0];
 			for (unsigned qi = 1; qi <= p/2; ++qi)
 				out << " " << _z[p][qi];
+			if( p < Order ) out << "\n";
 		}
 		return out;
 	}
