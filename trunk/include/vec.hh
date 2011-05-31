@@ -1,8 +1,8 @@
 /**
- *  @file zsig.hh
+ *  @file vec.hh
  *  @brief Generic Vector class
  *  @author Andre Maximo
- *  @date Mar, 2009
+ *  @date May, 2008
  */
 
 #ifndef ZSIG_VEC_HH
@@ -55,7 +55,7 @@ public:
 	/// Destructor
 	~vec() { }
 
-	/// Clear values
+	/// @brief Clear values
 	void clear( void ) { *this = T(); }
 
 	/** @brief Get first coordinate value of this vec
