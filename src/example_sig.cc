@@ -14,6 +14,14 @@ int main( int argc, char *argv[] ) {
 	std::cout << "[zsig] Usage: " << argv[0] << " [write] (where write = 1 outputs images as ppm)\n"
 		  << "[zsig] Example ** 3 ** Signature\n";
 
+	zsig::SignatureT< DOMAIN_GRID_X, DOMAIN_GRID_Y, float > s;
+
+	s[1][1] = 1.f;
+
+	zsig::SignatureT< DOMAIN_GRID_X, DOMAIN_GRID_Y, float > p(s);
+
+	std::cout << p << "\n";
+
 	zsig::SignaturePlaneT< float > sp;
 
 	std::cout << sp.origin() << "\n";
