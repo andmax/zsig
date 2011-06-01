@@ -24,7 +24,7 @@ namespace zsig {
 /** @relates ZernikePolynomialsBasisT
  *  @brief Compute factorial of n: \f$n!\f$
  *
- *  @param _n Number to compute the factorial of
+ *  @param[in] _n Number to compute the factorial of
  *  @return Factorial of n
  *  @tparam T defines number precision
  *  @see ZernikePolynomialsBasisT
@@ -50,9 +50,9 @@ T fac( const int& _n ) {
   \label{eq:Rpq}
  *  \f}
  *
- *  @param _p Radial order
- *  @param _q Frequency repetition
- *  @param _r Domain radius \f$\rho\f$ to compute the polynomial
+ *  @param[in] _p Radial order
+ *  @param[in] _q Frequency repetition
+ *  @param[in] _r Domain radius \f$\rho\f$ to compute the polynomial
  *  @return Radial Polynomial \f$R_{p}^{q}(\rho)\f$
  *  @tparam T defines number precision
  *  @see ZernikePolynomialsBasisT
@@ -90,10 +90,10 @@ T compute_R( const unsigned& _p,
   V_{p}^{q}(\rho, \theta) = R_{p}^{q}(\rho) e^{iq\theta}
  *  \f}
  *
- *  @param _p Radial order
- *  @param _q Frequency repetition
- *  @param _r Domain radius \f$\rho\f$ to compute the polynomial
- *  @param _t Domain angle \f$\theta\f$ to compute the polynomial
+ *  @param[in] _p Radial order
+ *  @param[in] _q Frequency repetition
+ *  @param[in] _r Domain radius \f$\rho\f$ to compute the polynomial
+ *  @param[in] _t Domain angle \f$\theta\f$ to compute the polynomial
  *  @return Zernike Polynomial \f$V_{p}^{q}(\rho, \theta)\f$
  *  @tparam T defines number precision
  *  @see ZernikePolynomialsBasisT
@@ -202,10 +202,10 @@ public:
 	 *  can be pre-computed and stored since the basis is valid to
 	 *  project any function in the same normalized domain.
 	 *
-	 *  @param _fxy Discrete function to look up values (at [x, y] or _fxy[x][y])
-	 *  @param _zpb Zernike Polynomials Basis for each [x, y]
-	 *  @param _szx Function domain size on the x-direction
-	 *  @param _szy Function domain size on the y-direction
+	 *  @param[in] _fxy Discrete function to look up values (at [x, y] or _fxy[x][y])
+	 *  @param[in] _zpb Zernike Polynomials Basis for each [x, y]
+	 *  @param[in] _szx Function domain size on the x-direction
+	 *  @param[in] _szy Function domain size on the y-direction
 	 */
 	void project( const T **_fxy,
 		      const zpolbasis_type **_zpb,
@@ -232,10 +232,10 @@ public:
 
 	/** @overload void project( T **_fxy, zpolbasis_type **_zpb, const unsigned int& _szx, const unsigned int& _szy )
 	 *
-	 *  @param _fxy Discrete function to look up values (at [x, y] or _fxy[x][y])
-	 *  @param _zpb Zernike Polynomials Basis for each [x, y]
-	 *  @param _szx Function domain size on the x-direction
-	 *  @param _szy Function domain size on the y-direction
+	 *  @param[in] _fxy Discrete function to look up values (at [x, y] or _fxy[x][y])
+	 *  @param[in] _zpb Zernike Polynomials Basis for each [x, y]
+	 *  @param[in] _szx Function domain size on the x-direction
+	 *  @param[in] _szy Function domain size on the y-direction
 	 */
 	void project( T **_fxy,
 		      zpolbasis_type **_zpb,
@@ -251,9 +251,9 @@ public:
 	 *  the complex conjugate of V (\f$(\bar{V_{p}^{q}})[x,y]\f$)
 	 *  as in compute_basis.
 	 *
-	 *  @param _fxy Discrete function to look up values (at [x, y] or _fxy[x][y])
-	 *  @param _szx Function domain size on the x-direction
-	 *  @param _szy Function domain size on the y-direction
+	 *  @param[in] _fxy Discrete function to look up values (at [x, y] or _fxy[x][y])
+	 *  @param[in] _szx Function domain size on the x-direction
+	 *  @param[in] _szy Function domain size on the y-direction
 	 */
 	void project( const T **_fxy,
 		      const unsigned int& _szx,
@@ -281,9 +281,9 @@ public:
 
 	/** @overload void project( T **_fxy, const unsigned int& _szx, const unsigned int& _szy )
 	 *
-	 *  @param _fxy Discrete function to look up values (at [x, y] or _fxy[x][y])
-	 *  @param _szx Function domain size on the x-direction
-	 *  @param _szy Function domain size on the y-direction
+	 *  @param[in] _fxy Discrete function to look up values (at [x, y] or _fxy[x][y])
+	 *  @param[in] _szx Function domain size on the x-direction
+	 *  @param[in] _szy Function domain size on the y-direction
 	 */
 	void project( T **_fxy,
 		      const unsigned int& _szx,
@@ -299,10 +299,10 @@ public:
 	 *  coefficients and a given Zernike Polynomial Basis as
 	 *  \f$(V_{p}^{q})[x,y]\f$.
 	 *
-	 *  @param _fxy Discrete function to reconstruct (at [x, y] or _fxy[x][y])
-	 *  @param _zpb Zernike Polynomials Basis for each [x, y]
-	 *  @param _szx Function domain size on the x-direction
-	 *  @param _szy Function domain size on the y-direction
+	 *  @param[out] _fxy Discrete function to reconstruct (at [x, y] or _fxy[x][y])
+	 *  @param[in] _zpb Zernike Polynomials Basis for each [x, y]
+	 *  @param[in] _szx Function domain size on the x-direction
+	 *  @param[in] _szy Function domain size on the y-direction
 	 */
 	void reconstruct( T **_fxy,
 			  const zpolbasis_type **_zpb,
@@ -326,10 +326,10 @@ public:
 
 	/** @overload void reconstruct( T **_fxy, zpolbasis_type **_zpb, const unsigned int& _szx, const unsigned int& _szy ) const
 	 *
-	 *  @param _fxy Discrete function to reconstruct (at [x, y] or _fxy[x][y])
-	 *  @param _zpb Zernike Polynomials Basis for each [x, y]
-	 *  @param _szx Function domain size on the x-direction
-	 *  @param _szy Function domain size on the y-direction
+	 *  @param[out] _fxy Discrete function to reconstruct (at [x, y] or _fxy[x][y])
+	 *  @param[in] _zpb Zernike Polynomials Basis for each [x, y]
+	 *  @param[in] _szx Function domain size on the x-direction
+	 *  @param[in] _szy Function domain size on the y-direction
 	 */
 	void reconstruct( T **_fxy,
 			  zpolbasis_type **_zpb,
@@ -344,9 +344,9 @@ public:
 	 *  use the Discrete Zernike Basis and, therefore, has to
 	 *  compute V (\f$(V_{p}^{q})[x,y]\f$) as in compute_basis.
 	 *
-	 *  @param _fxy Discrete function to reconstruct (at [x, y] or _fxy[x][y])
-	 *  @param _szx Function domain size on the x-direction
-	 *  @param _szy Function domain size on the y-direction
+	 *  @param[out] _fxy Discrete function to reconstruct (at [x, y] or _fxy[x][y])
+	 *  @param[in] _szx Function domain size on the x-direction
+	 *  @param[in] _szy Function domain size on the y-direction
 	 */
 	void reconstruct( T **_fxy,
 			  const unsigned int& _szx,
@@ -384,7 +384,7 @@ public:
 	 *  given another polynomial coefficients computing the
 	 *  Euclidean distance between the two in Zernike space.
 	 *
-	 *  @param _zp Zernike polynomial to compare to
+	 *  @param[in] _zp Zernike polynomial to compare to
 	 *  @return Euclidean distance between Zernike coefficients
 	 */
 	T compare( const zpolbasis_type& _zp ) const {
@@ -402,22 +402,22 @@ public:
 
 	/** @brief Read/write operator of each radial polynomial
 	 *
-	 *  @param _p Radial order
+	 *  @param[in] _p Radial order
 	 *  @return Radial polynomial of order _p
 	 */
 	radial_polynomial& operator[] ( const unsigned& _p ) { return this->pol[_p]; }
 
 	/** @brief Read operator of each radial polynomial
 	 *
-	 *  @param _p Radial order
+	 *  @param[in] _p Radial order
 	 *  @return Constant radial polynomial of order _p
 	 */
 	const radial_polynomial& operator[] ( const unsigned& _p ) const { return this->pol[_p]; }
 
 	/** @brief Output stream operator
 	 *
-	 *  @param out Output stream
-	 *  @param _z Zernike Polynomials Basis to output
+	 *  @param[in,out] out Output stream
+	 *  @param[in] _z Zernike Polynomials Basis to output
 	 *  @return Output stream
 	 */
 	friend std::ostream& operator << ( std::ostream& out,
@@ -433,8 +433,8 @@ public:
 
 	/** @brief Input stream operator
 	 *
-	 *  @param in Input stream
-	 *  @param _z Zernike Polynomials Basis to output
+	 *  @param[in,out] in Input stream
+	 *  @param[out] _z Zernike Polynomials Basis to input
 	 *  @return Input stream
 	 */
 	friend std::istream& operator >> ( std::istream& in,
@@ -484,9 +484,9 @@ private:
  *  qi[0, 1, 2]) and not: q[-4, -2, 0, 2, 4]; since the conjugate of q
  *  and -q are the same V_{p}^{q} = V*_{p}^{-q}.
  *
- *  @param _zpb Zernike Polynomials Basis for each [x, y]
- *  @param _szx Domain size of the x-direction
- *  @param _szy Domain size of the y-direction
+ *  @param[out] _zpb Zernike Polynomials Basis for each [x, y]
+ *  @param[in] _szx Domain size of the x-direction
+ *  @param[in] _szy Domain size of the y-direction
  *  @tparam O defines Zernike target radial order
  *  @tparam T defines number precision
  *  @see ZernikePolynomialsBasisT

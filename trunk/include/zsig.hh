@@ -60,11 +60,11 @@ the svn repository.
 
 \section acknowledgments Acknowledgments
 
-This library was developed during the doctorate research of Andre
-Maximo at GVIL under the supervision of Professor Amitabh Varshney.
-We acknowledge the grant to the student provided by Brazilian research
-agency CNPq (National Counsel of Technological and Scientific
-Development).
+This library was developed during the doctorate internship research of
+Andre Maximo at GVIL under the supervision of Professor Amitabh
+Varshney.  We acknowledge the grant to the student (\a sandwich
+doctorate) provided by Brazilian research agency CNPq (National
+Counsel of Technological and Scientific Development).
 
 \section credits Credits
 

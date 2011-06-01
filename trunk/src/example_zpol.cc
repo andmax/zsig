@@ -8,10 +8,10 @@
 #define ZERNIKE_ORDER 8
 #define ZERNIKE_VALUE_TYPE long double
 
+typedef zsig::ZernikePolynomialsBasisT< ZERNIKE_ORDER, ZERNIKE_VALUE_TYPE > zpolbasis_type;
+
 #define DOMAIN_GRID_X 256
 #define DOMAIN_GRID_Y 256
-
-typedef zsig::ZernikePolynomialsBasisT< ZERNIKE_ORDER, ZERNIKE_VALUE_TYPE > zpolbasis_type;
 
 typedef unsigned char ppmimg [DOMAIN_GRID_X * DOMAIN_GRID_Y * 3];
 
