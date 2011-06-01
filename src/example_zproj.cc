@@ -7,10 +7,10 @@
 #define ZERNIKE_ORDER 8
 #define ZERNIKE_VALUE_TYPE long double
 
+typedef zsig::ZernikePolynomialsBasisT< ZERNIKE_ORDER, ZERNIKE_VALUE_TYPE > zpolbasis_type;
+
 #define DOMAIN_GRID_X 256
 #define DOMAIN_GRID_Y 256
-
-typedef zsig::ZernikePolynomialsBasisT< ZERNIKE_ORDER, ZERNIKE_VALUE_TYPE > zpolbasis_type;
 
 typedef unsigned char pgmimg [DOMAIN_GRID_X][DOMAIN_GRID_Y];
 
@@ -184,7 +184,7 @@ int main( int argc, char *argv[] ) {
 
 	ZERNIKE_VALUE_TYPE dist = Zriver.compare( Zrotated );
 
-	std::cout << "[zsig] ... give the Euclidean distance of these two image in Zernike space: " << dist << "\n";
+	std::cout << "[zsig] ... give the Euclidean distance of these two images in Zernike space: " << dist << "\n";
 
 	std::cout << "[zsig] Generating vale gray image\n";
 
@@ -257,7 +257,7 @@ int main( int argc, char *argv[] ) {
 
 	dist = Zriver.compare( Zvale );
 
-	std::cout << "[zsig] ... give the Euclidean distance of these two image in Zernike space: " << dist << "\n";
+	std::cout << "[zsig] ... give the Euclidean distance of these two images in Zernike space: " << dist << "\n";
 
 	std::cout << "[zsig] Done!\n";
 
