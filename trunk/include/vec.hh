@@ -411,6 +411,22 @@ protected:
 
 };
 
+//=== IMPLEMENTATION ==========================================================
+
+/** @relates vec
+ *  @brief Project vertex on a plane
+ *  @param[in,out] _v Vertex to be projected
+ *  @param[in] _n Normal of the plane
+ *  @param[in] _p Point on the plane
+ *  @tparam D Vector/point dimension
+ *  @tparam T Vector/point value type
+ */
+template< unsigned D, class T >
+void project_vertex( vec< D, T >& _v, const vec< D, T >& _n, const vec< D, T >& _p ) {
+	T t = _n ^ ( _v - _p );
+	_v -= t * _n;
+}
+
 //=============================================================================
 } // namespace zsig
 //=============================================================================

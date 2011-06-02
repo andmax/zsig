@@ -1,4 +1,5 @@
 
+#include <limits>
 #include <iomanip>
 
 #include <zsig.hh>
@@ -65,6 +66,28 @@ int main( int argc, char *argv[] ) {
 	std::cout << "[zsig] Zernike coefficients corresponding to signature:\n\n";
 
 	std::cout << std::scientific << std::showpos << Zpyramid << "\n\n";
+
+	std::cout << "[zsig] Reconstructing signature from its coefficients\n";
+
+	Zpyramid.reconstruct( &sig_pyramid, &ZernikeBasis, DOMAIN_GRID_X, DOMAIN_GRID_Y );
+
+	// min/max scalar values
+	SIGNATURE_TYPE mins = std::numeric_limits< SIGNATURE_TYPE >::max(), maxs = -std::numeric_limits< SIGNATURE_TYPE >::max();
+
+	for (unsigned gx = 0; gx < DOMAIN_GRID_X; ++gx) {
+		for (unsigned gy = 0; gy < DOMAIN_GRID_Y; ++gy) {
+			mins = std::min( mins, sig_pyramid[gx][gy] );
+			maxs = std::max( maxs, sig_pyramid[gx][gy] );
+		}
+	}
+
+	for (unsigned gx = 0; gx < DOMAIN_GRID_X; ++gx)
+		for (unsigned gy = 0; gy < DOMAIN_GRID_Y; ++gy)
+			sig_pyramid[gx][gy] = (sig_pyramid[gx][gy] - mins) / (maxs - mins);
+
+	std::cout << "[zsig] Pyramid signature:\n\n";
+
+	std::cout << std::noshowpos << std::fixed << sig_pyramid << "\n\n";
 
 	std::cout << "[zsig] Done!\n";
 
