@@ -10,7 +10,9 @@
 
 //== INCLUDES =================================================================
 
+#include <set>
 #include <vector>
+#include <limits>
 #include <fstream>
 #include <iostream>
 
@@ -155,61 +157,12 @@ private:
 
 //== CLASS DEFINITION =========================================================
 
-/** @class SignaturePlaneT signaturet.hh
- *  @brief Signature Plane class
- *
- *  Signature plane containing the local coordinate frame (LCF) and
- *  the tangent plane at the corresponding vertex signature.
- *
- *  @tparam T Signature Plane coordinate values type
- */
-template< class T >
-class SignaturePlaneT {
-
-public:
-
-	typedef vec< 3, T > vec_type; ///< Vector or point (simply "vec") type
-
-	/// Default constructor
-	SignaturePlaneT() { }
-
-	/// Destructor
-	~SignaturePlaneT() { }
-
-	/** @brief Get plane's origin
-	 *  @return Origin position
-	 */
-	vec_type& origin( void ) { return P; }
-
-	/** @brief Get plane's origin
-	 *  @return Constant origin position
-	 */
-	const vec_type& origin( void ) const { return P; }
-
-	/** @brief Get plane's normal
-	 *  @return Normal vector
-	 */
-	vec_type& normal( void ) { return Z; }
-
-	/** @brief Get plane's normal
-	 *  @return Constant normal vector
-	 */
-	const vec_type& normal( void ) const { return Z; }
-
-private:
-
-	vec_type P, X, Y, Z; ///< Origin position and LCF
-
-};
-
-//== CLASS DEFINITION =========================================================
-
 /** @class SignatureMeshT signaturet.hh
  *  @brief Signature Mesh class
  *
- *  This is a simple mesh class to support vertex signature based on
- *  its tangent plane (see SignaturePlaneT class and SignatureT class
- *  for more details).
+ *  This is a simple mesh class to support vertex signatures (see
+ *  SignatureT class for more details) based on the tangent plane
+ *  defined for a vertex.
  *
  *  @tparam T Mesh coordinate values type
  */
@@ -219,10 +172,11 @@ class SignatureMeshT {
 public:
 
 	typedef vec< 3, T > vec3; ///< Vector or point (simply "vec") type
-	typedef vec< 3, unsigned > ivec3; ///< Triangular face type
+	typedef vec< 3, unsigned > uvec3; ///< Unsigned integer vec3 type
 	typedef SignatureMeshT< T > mesh_type; ///< This class type
 	typedef std::vector< unsigned > index_list; ///< Index list type
-	typedef vec3 bbox_type [2]; ///< Bounding box [min, max] type
+	typedef vec3 bbox_type [2]; ///< Bounding box type (min, max)
+	typedef vec3 sigplane_type [4]; ///< Signature plane type with Origin Position and LCF (P, X, Y, Z)
 
 	/// Default constructor
 	SignatureMeshT() : nv(0), nf(0), gd(0), va(0), fa(0), gfa(0), fna(0) { }
@@ -237,13 +191,15 @@ public:
 
 	/// @brief Clear this mesh
 	void clear( void ) {
-		nv = nf = gd = 0;
+		nv = nf = gd = 0; msd = (T)0;
 		if( va ) { delete [] va; va = 0; }
 		if( fa ) { delete [] fa; fa = 0; }
 		if( gfa ) { delete [] gfa; gfa = 0; }
 		if( fna ) { delete [] fna; fna = 0; }
 		nfv.clear();
-		bb[0] = bb[1] = diag = vec3();
+		bb[0].clear();
+		bb[1].clear();
+		diag.clear();
 	}
 
 	/** @brief Assign operator
@@ -254,7 +210,7 @@ public:
 		this->clear();
 		this->set_vertices( _m.size_of_vertices(), _m.vertices() );
 		this->set_faces( _m.size_of_faces(), _m.faces() );
-		this->set_grid( _m.grid_dimension(), _m.grid() );
+		this->set_grid( _m.grid_dimension(), _m.grid(), _m.maximum_search_distance() );
 		this->set_fnormals( _m.size_of_faces(), _m.fnormals() );
 		this->set_neighborhood( _m.neighborhood() );
 		this->set_bbox( _m.bounding_box(), _m.diagonal() );
@@ -270,7 +226,7 @@ public:
 		this->clear();
 		_in >> h >> nv >> nf >> ne;
 		va = new vec3[ nv ];
-		fa = new ivec3[ nf ];
+		fa = new uvec3[ nf ];
 		for (unsigned i = 0; i < nv; ++i)
 			_in >> va[i];
 		for (unsigned i = 0; i < nf; ++i)
@@ -290,30 +246,31 @@ public:
 	//@{
 
 	/** @brief Build 3D regular grid (with faces) for neighborhood searching
-	 *  @param[in,out] _msd Maximum searching distance (using grid) for neighbors (default returns 2.5% of the diagonal bounding box)
+	 *  @param[in,out] _msd Maximum search distance (using grid) for neighbors (default returns 2.5% of the diagonal bounding box)
 	 */
 	void build_grid( T& _msd ) {
 		if( gfa ) delete [] gfa;
-		gd = round( (T)1 / _msd );
+		gd = ceil( (T)1 / _msd );
 		gfa = new std::vector< unsigned >[ gd * gd * gd ];
-		ivec3 gp; // grid position
+		uvec3 gp; // grid position
 		for (unsigned i = 0; i < nf; ++i) {
 			for (unsigned j = 0; j < 3; ++j) {
 				convert_to_grid( va[ fa[i][j] ], gp );
 				gfa[ gp[0]*gd*gd + gp[1]*gd + gp[2] ].push_back( i );
  			} // j
 		} // i
+		msd = _msd;
 	}
 
 	/** @overload void build_grid( void )
 	 *
 	 *  This method depends on building mesh's bounding box (see
 	 *  @ref build_bbox) to compute the diagonal distance and use
-	 *  it as the missing maximum searching distance parameter
-	 *  (2.5 % of the diagonal bounding box).
+	 *  it as the missing maximum search distance parameter (2.5 %
+	 *  of the diagonal bounding box).
 	 */
 	void build_grid( void ) {
-		T msd = diagonal_distance() / (T)40; // _msd = 2.5 % of diagonal bounding box
+		msd = diagonal_distance() / (T)40; // _msd = 2.5 % of diagonal bounding box
 		if( msd ) build_grid( msd );
 	}
 
@@ -325,6 +282,8 @@ public:
 		for (unsigned i = 0; i < nf; ++i) {
 			for (unsigned k = 0; k < 3; ++k)
 				fv[k] = va[ fa[i][k] ];
+			// considering counter-clockwise orientation
+			// in faces when computing face normal
 			fna[i] = ( fv[1] - fv[0] ) % ( fv[2] - fv[0] );
 		}
 	}
@@ -342,7 +301,7 @@ public:
 
 	/// @brief Build mesh bounding box
 	void build_bbox( void ) {
-		if( !va ) { diag = bb[1] = bb[0] = vec3(); return; }
+		if( !va ) { bb[0].clear(); bb[1].clear(); diag.clear(); return; }
 		bb[1] = bb[0] = va[0];
 		for (unsigned i = 1; i < nv; ++i) {
 			for (unsigned k = 0; k < 3; ++k) {
@@ -351,6 +310,83 @@ public:
 			}
 		}
 		diag = bb[1] - bb[0];
+	}
+
+	//@}
+
+	// @name Compute functions
+	//@{
+
+	/** @brief Compute neighborhood of faces for a given vertex
+	 *
+	 *  To work properly, this method needs building the mesh's
+	 *  regular grid for neighborhood searching (see @ref
+	 *  build_grid).
+	 *
+	 *  @param[in] _i Index of the vertex to compute neighborhood
+	 *  @param[out] _nf Neighborhood of faces to consider around vertex _i
+	 */
+	void compute_neighborhood( const unsigned& _i,
+				   std::set< unsigned >& _nf ) const {
+		vec3 v = va[ _i ]; // vertex position
+		uvec3 gp; // grid position of vertex
+		convert_to_grid( v, gp );
+		_nf.clear();
+		for (unsigned ci = std::max((int)gp[0]-1, 0); ci <= std::min((int)gp[0]+1, (int)gd-1); ++ci) {
+			for (unsigned cj = std::max((int)gp[1]-1, 0); cj <= std::min((int)gp[1]+1, (int)gd-1); ++cj) {
+				for (unsigned ck = std::max((int)gp[2]-1, 0); ck <= std::min((int)gp[2]+1, (int)gd-1); ++ck) {
+					for (unsigned i = 0; i < gfa[ci*gd*gd+cj*gd+ck].size(); ++i) {
+						unsigned fi = gfa[ci*gd*gd+cj*gd+ck][i];
+						for (unsigned vi = 0; vi < 3; ++vi) {
+							vec3 ov = va[ fa[fi][vi] ];
+							if( (ov - v).length() <= msd ) { _nf.insert( fi ); break; }
+						} // vi
+					} // i
+				} // ck
+			} // cj
+		} // ci
+	}
+
+	/** @brief Compute signature plane of a given vertex
+	 *
+	 *  This method depends on the @ref compute_normal method,
+	 *  which depends on the @ref build_fnormals method.
+	 *
+	 *  @param[in] _i Index of the vertex to compute signature plane
+	 *  @param[out] _sp Signature plane of vertex _i
+	 */
+	void compute_sigplane( const unsigned& _i, sigplane_type& _sp ) const {
+		_sp[0] = va[ _i ];
+		compute_normal( _i, _sp[3] );
+		_sp[3].normalize();
+		// get any vertex connected to the given vertex,
+		// project it onto the tangent plane, and use it to
+		// stipulate the vector Y of the LCF; it does not
+		// matter which vector is since the signature will be
+		// converted to Zernike coefficients becoming
+		// rotationally invariant
+		unsigned k = 0;
+		while( k < 2 and fa[ nfv[ _i ][0] ][k] == _i ) ++k;
+		_sp[2] = va[ fa[ nfv[ _i ][0] ][k] ]; // other vertex
+		project_vertex( _sp[2], _sp[3], _sp[0] );
+		_sp[2] -= _sp[0];
+		_sp[2].normalize();
+		_sp[1] = _sp[2] % _sp[3];
+	}
+
+	/** @brief Compute normal at a given vertex
+	 *
+	 *  To work properly, this method needs building the mesh's
+	 *  face normals (see @ref build_fnormals).
+	 *
+	 *  @param[in] _i Index of vertex to compute normal at
+	 *  @param[out] _n Normal at vertex _i
+	 */
+	void compute_normal( const unsigned& _i, vec3& _n ) const {
+		_n.clear();
+		for (unsigned fi = 0; fi < nfv[_i].size(); ++fi)
+			_n += fna[ nfv[_i][fi] ];
+		_n /= nfv[_i].size();
 	}
 
 	//@}
@@ -375,11 +411,11 @@ public:
 	 *  @param[in] _nf Number of faces to set
 	 *  @param[in] _fa Faces array to set
 	 */
-	void set_faces( const unsigned& _nf, const ivec3 *_fa ) {
+	void set_faces( const unsigned& _nf, const uvec3 *_fa ) {
 		if( !_fa ) return;
 		nf = _nf;
 		if( fa ) delete [] fa;
-		fa = new ivec3[ nf ];
+		fa = new uvec3[ nf ];
 		for (unsigned i = 0; i < nf; ++i)
 			fa[i] = _fa[i];
 	}
@@ -387,8 +423,9 @@ public:
 	/** @brief Set grid of this mesh
 	 *  @param[in] _gd Grid dimension to set
 	 *  @param[in] _gfa Grid faces array to set
+	 *  @param[in] _msd Maximum search distance to set
 	 */
-	void set_grid( const unsigned& _gd, const index_list *_gfa ) {
+	void set_grid( const unsigned& _gd, const index_list *_gfa, const T& _msd ) {
 		if( !_gfa ) return;
 		gd = _gd;
 		if( gfa ) delete [] gfa;
@@ -397,6 +434,7 @@ public:
 			for (unsigned j = 0; j < gd; ++j)
 				for (unsigned k = 0; k < gd; ++k)
 					gfa[ i*gd*gd + j*gd + k ] = _gfa[ i*gd*gd + j*gd + k ];
+		msd = _msd;
 	}
 
 	/** @brief Set face normals of this mesh
@@ -461,12 +499,12 @@ public:
 	/** @brief Get the faces of this mesh
 	 *  @return Faces of this mesh
 	 */
-	ivec3 *faces( void ) { return fa; }
+	uvec3 *faces( void ) { return fa; }
 
-	/** @overload const ivec3 *faces( void ) const
+	/** @overload const uvec3 *faces( void ) const
 	 *  @return Constant faces of this mesh
 	 */
-	const ivec3 *faces( void ) const { return fa; }
+	const uvec3 *faces( void ) const { return fa; }
 
 	/** @brief Get the grid of this mesh
 	 *  @return Grid of this mesh
@@ -477,6 +515,16 @@ public:
 	 *  @return Constant grid of this mesh
 	 */
 	const index_list *grid( void ) const { return gfa; }
+
+	/** @brief Get the maximum search distance of this mesh
+	 *  @return Maximum search distance of this mesh
+	 */
+	T& maximum_search_distance( void ) { return msd; }
+
+	/** @overload const T& maximum_search_distance( void ) const
+	 *  @return Constant maximum search distance of this mesh
+	 */
+	const T& maximum_search_distance( void ) const { return msd; }
 
 	/** @brief Get the face normals of this mesh
 	 *  @return Face normals of this mesh
@@ -531,30 +579,20 @@ protected:
 	 *  @param[in] _p Position in space to convert
 	 *  @param[out] _g Converted grid position
 	 */
-	void convert_to_grid( const vec3& _p, ivec3& _g ) const {
+	void convert_to_grid( const vec3& _p, uvec3& _g ) const {
 		vec3 bp = (_p - bb[0]) / diag; // bounding box relative position
 		_g[0] = std::min( (unsigned)(bp[0] * gd), gd-1 );
 		_g[1] = std::min( (unsigned)(bp[1] * gd), gd-1 );
 		_g[2] = std::min( (unsigned)(bp[2] * gd), gd-1 );
 	}
 
-	/** @brief Compute normal at a given vertex
-	 *  @param[in] _i Index of vertex to compute normal at
-	 *  @return Normal at vertex _i
-	 */
-	vec3 compute_normal( const unsigned& _i ) const {
-		vec3 avgn; // average normal at vertex i
-		for (unsigned fi = 0; fi < nfv[_i].size(); ++fi)
-			avgn += fna[ nfv[_i][fi] ];
-		return avgn / nfv[_i].size();
-	}
-
 private:
 
 	unsigned nv, nf, gd; ///< Number of vertices, faces and grid dimension
 	vec3 *va; ///< Vertices array
-	ivec3 *fa; ///< Faces array
+	uvec3 *fa; ///< Faces array
 	index_list *gfa; ///< Grid of faces array
+	T msd; ///< Maximum distance that can be used in neighborhood search
 	vec3 *fna; ///< Face normals array
 	std::vector< index_list > nfv; ///< Neighborhood of faces around each vertex
 	bbox_type bb; ///< Mesh's bounding box
@@ -567,6 +605,211 @@ private:
  *
  *  @see signaturet.hh
  */
+
+//=== IMPLEMENTATION ==========================================================
+
+/** @relates SignatureMeshT
+ *  @brief Compute heightmap signature of a given vertex
+ *
+ *  This function computes a vertex signature given the meshed
+ *  surface.  The signature is a heightmap image representing the
+ *  surface neighborhood of the vertex.
+ *
+ *  @param _sig Signature to return
+ *  @param _m Mesh surface to compute heightmap signature of
+ *  @param _i Index of the vertex in the mesh to compute the signature of
+ *  @tparam R Signature row dimension
+ *  @tparam C Signature column dimension
+ *  @tparam T Signature value type
+ *  @see SignatureMeshT @see SignatureT
+ */
+template< unsigned R, unsigned C, class T >
+void compute_signature( SignatureT< R, C, T >& _sig,
+			const SignatureMeshT< T >& _m,
+			const unsigned& _i ) {
+
+	typedef typename SignatureMeshT< T >::vec3 vec3;
+	typedef typename SignatureMeshT< T >::sigplane_type sigplane_type;
+
+	sigplane_type sp; // tangent plane on top of the vertex
+
+	_m.compute_sigplane( _i, sp );
+
+	T hmr = _m.maximum_search_distance(); // heightmap radius
+	T inf = 1.5 * hmr; // heightmap infinity value
+	vec3 vX, vY, vZ; // three generic vectors used throughout this function
+
+	vX = sp[1] * hmr; // vector base of tangent plane in X
+	vY = sp[2] * hmr; // vector base of tangent plane in Y
+
+	vec3 pq[4]; // tangent plane quad border points
+
+	pq[0] = sp[0] - vX - vY;
+	pq[1] = sp[0] + vX - vY;
+	pq[2] = sp[0] + vX + vY;
+	pq[3] = sp[0] - vX + vY;
+
+	vX = pq[1] - pq[0];
+	vY = pq[3] - pq[0];
+
+	T lx = vX.sqrl(); // squared length of vector X
+	T ly = vY.sqrl(); // squared length of vector Y
+
+	vec3 di, dj; // tangent plane cell supporting vectors
+
+	di = vY / (T)R;
+	dj = vX / (T)C;
+
+ 	std::set< unsigned > nf; // neighborhood of faces to be consider around vertex
+	_m.compute_neighborhood( _i, nf );
+
+	// auxiliary data structure storing faces to be considered for each cell
+	std::vector< unsigned > grid_faces[ R ][ C ];
+	unsigned fi; // current face index
+	int bb[2][2]; // face bounding box over the plane
+	vec3 bp, lp; // base and line points
+	T u, v; // (u, v) position over the plane
+	int gi, gj; // (i, j) grid discrete position
+
+	// build auxiliary grid cell faces data structure
+	for (std::set< unsigned >::iterator sit = nf.begin(); sit != nf.end(); ++sit) {
+
+		fi = *sit;
+		bb[0][0] = R; bb[0][1] = C; bb[1][0] = bb[1][1] = -1; // reset bounding box
+
+		// compute the current face's bounding box over the plane
+		for (unsigned vi = 0; vi < 3; ++vi) {
+
+			bp = _m.vertices()[ _m.faces()[fi][vi] ]; // face vertex position = base point
+
+			project_vertex( bp, sp[3], sp[0] ); // project point onto tangent plane
+
+			bp -= pq[0]; // converting projected base point to plane vector
+
+			u = ( bp ^ vX ) / lx; // computing (u, v) position over the plane
+			v = ( bp ^ vY ) / ly;
+
+			gi = (int)( v * R ); // discretizing (u, v)
+			gj = (int)( u * C );
+
+			// [0, 1] -> |--|-..-| last bar (1) is the last grid cell also
+			if( gi >= R ) gi = R - 1;
+			if( gj >= C ) gj = C - 1;
+			if( gi < 0 ) gi = 0;
+			if( gj < 0 ) gj = 0;
+
+			if( gi < bb[0][0] ) bb[0][0] = gi; // update bounding box
+			if( gi > bb[1][0] ) bb[1][0] = gi;
+			if( gj < bb[0][1] ) bb[0][1] = gj;
+			if( gj > bb[1][1] ) bb[1][1] = gj;
+
+		}
+
+		// insert face on all grid cells inside the face bounding box
+		for (gi = bb[0][0]; gi <= bb[1][0]; ++gi)
+			for (gj = bb[0][1]; gj <= bb[1][1]; ++gj)
+				grid_faces[gi][gj].push_back( *sit );
+
+	} // sit
+
+	T x, y; // (x, y) position over the plane
+	T hitt; // hitted t line parameter
+	T det; // determinant of intersection matrix
+	vec< 3, vec3 > inv; // inverse of intersection matrix
+	vec3 fn; // current face normal
+	vec3 p0, p1, p2; // current face vertices
+	vec3 b, ipoint; // target vector and intersection point
+	T t; // intersection line parameter
+
+	bp = pq[0] + ( di * 0.5 ) + ( dj * 0.5 ); // base point at the center of cell
+	vZ = sp[3]; // tangent normal
+
+	for (gi = 0; gi < R; ++gi) { // for each grid row
+
+		y = ( (T)2 * gi + (T)1 ) / (T)R - (T)1;
+
+		for (gj = 0; gj < C; ++gj) { // for each grid column
+
+			_sig[gi][gj] = inf; // set the current grid cell to infinity height
+
+			hitt = std::numeric_limits< T >::max(); // set the current hit t to infinity
+
+			x = ( (T)2 * gj + (T)1 ) / (T)C - (T)1;
+			
+			if( sqrt( x*x + y*y ) > (T)1 ) continue; // compute heightmap signature only inside unit disk
+
+			lp = bp + ( di * gi ) + ( dj * gj ); // define cell's line by the current grid cell center point
+
+			// shoot rays in both direction (over the cell's line) to find intersections
+			for (std::vector< unsigned >::iterator vit = grid_faces[gi][gj].begin(); vit != grid_faces[gi][gj].end(); ++vit) {
+
+				fi = *vit;
+
+				fn = _m.fnormals()[ fi ]; // current face normal
+
+				// define three vertices of the current triangular face
+				p0 = _m.vertices()[ _m.faces()[fi][0] ];
+				p1 = _m.vertices()[ _m.faces()[fi][1] ];
+				p2 = _m.vertices()[ _m.faces()[fi][2] ];
+
+				// the intersection matrix A is defined by three vectors:
+				//   vX vector from p0 to p1; vY vector from p0 to p2; vZ the tangent-plane normal
+				vX = p1 - p0; 
+				vY = p2 - p0;
+
+				// compute the determinant of the intersection matrix:
+				//   A = |  vZ   vX   vY  |
+				det = vZ[0] * vX[1] * vY[2] - vZ[0] * vY[1] * vX[2]
+				+ vX[0] * vY[1] * vZ[2] - vX[0] * vZ[1] * vY[2]
+				+ vY[0] * vZ[1] * vX[2] - vY[0] * vX[1] * vZ[2];
+
+				// if the intersection matrix is linearly dependent..
+				if( fabs(det) < 1e-5 ) continue; //.. skip this face
+
+				// compute the inverse intersection matrix:
+				//   A^-1 = ( 1 / det ) * transpose of cofactor matrix
+				inv[0][0] = ( vX[1] * vY[2] - vY[1] * vX[2] ) / det;
+				inv[0][1] = ( vY[0] * vX[2] - vX[0] * vY[2] ) / det;
+				inv[0][2] = ( vX[0] * vY[1] - vY[0] * vX[1] ) / det;
+
+				inv[1][0] = ( vY[1] * vZ[2] - vZ[1] * vY[2] ) / det;
+				inv[1][1] = ( vZ[0] * vY[2] - vY[0] * vZ[2] ) / det;
+				inv[1][2] = ( vY[0] * vZ[1] - vZ[0] * vY[1] ) / det;
+
+				inv[2][0] = ( vZ[1] * vX[2] - vX[1] * vZ[2] ) / det;
+				inv[2][1] = ( vX[0] * vZ[2] - vZ[0] * vX[2] ) / det;
+				inv[2][2] = ( vZ[0] * vX[1] - vX[0] * vZ[1] ) / det;
+
+				// target vector b of the intersection linear system: A x = b
+				//   x = | t u v |^T
+				//   b = | point in line - point in triangle |
+				b = lp - p0;
+
+				// compute intersection point (u, v) parameters by x = A^-1 * b
+				u = inv[1] ^ b;
+				v = inv[2] ^ b;
+
+				// test if the intersection point is inside triangle
+				if( u >= 0.0 and u <= 1.0 and v >= 0.0 and v <= 1.0 and (u+v) <= 1.0 ) {
+
+					// compute intersection point line parameter t
+					t = inv[0] ^ b;
+
+					if( fabs(t) > fabs(hitt) ) continue;
+
+					hitt = t;
+
+					_sig[gi][gj] = t;
+
+				} // if
+
+			} // vit
+
+		} // gj
+
+	} // gi
+
+}
 
 //=============================================================================
 } // namespace zsig
