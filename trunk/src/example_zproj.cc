@@ -63,7 +63,7 @@ int main( int argc, char *argv[] ) {
 	std::vector<float[15]> a;
 
 	std::cout << "[zsig] Usage: " << argv[0] << " [write] (where write = 1 outputs images as ppm)\n"
-		  << "[zsig] Example ** 2 ** Project / Reconstruct / Compare\n"
+		  << "[zsig] Example 2 :: Project / Reconstruct / Compare\n"
 		  << "[zsig] Allocating memory for Zernike Polynomials Basis\n"
 		  << "[zsig] The domain grid is: " << DOMAIN_GRID_X << " x " << DOMAIN_GRID_Y
 		  << " with Zernike Order = " << ZERNIKE_ORDER
