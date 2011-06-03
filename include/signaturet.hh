@@ -217,7 +217,10 @@ public:
 		return *this;
 	}
 
-	/** @brief Read an Object File Format
+	// @name IO functions
+	//@{
+
+	/** @brief Read an OFF (Object File Format) to this mesh
 	 *  @param[in,out] _in The input stream to read the mesh from
 	 */
 	void read_off( std::istream& _in ) {
@@ -227,20 +230,43 @@ public:
 		_in >> h >> nv >> nf >> ne;
 		va = new vec3[ nv ];
 		fa = new uvec3[ nf ];
+		unsigned nvf; // (unused) number of vertices per face
 		for (unsigned i = 0; i < nv; ++i)
 			_in >> va[i];
 		for (unsigned i = 0; i < nf; ++i)
-			_in >> fa[i];
+			_in >> nvf >> fa[i];
 	}
 
 	/** @overload void read_off( const char* fn )
 	 *  @param[in] fn File name to be read
 	 */
 	void read_off( const char* fn ) {
-		std::ifstream in( fn, std::ios::in );
+		std::fstream in( fn, std::ios::in );
 		read_off( in );
 		in.close();
 	}
+
+	/** @brief Write an OFF (Object File Format) with this mesh
+	 *  @param[in,out] _out The output stream to write the mesh to
+	 */
+	void write_off( std::ostream& _out ) {
+		_out << "OFF\n" << nv << " " << nf << " 0\n";
+		for (unsigned i = 0; i < nv; ++i)
+			_out << va[i] << "\n";
+		for (unsigned i = 0; i < nf; ++i)
+			_out << "3 " << fa[i] << "\n";
+	}
+
+	/** @overload void write_off( const char* fn )
+	 *  @param[in] fn File name to be written
+	 */
+	void write_off( const char* fn ) {
+		std::fstream out( fn, std::ios::out );
+		write_off( out );
+		out.close();
+	}
+
+	//@}
 
 	// @name Build functions
 	//@{
@@ -362,8 +388,8 @@ public:
 		// get any vertex connected to the given vertex,
 		// project it onto the tangent plane, and use it to
 		// stipulate the vector Y of the LCF; it does not
-		// matter which vector is since the signature will be
-		// converted to Zernike coefficients becoming
+		// matter which vector Y is since the signature will
+		// be converted to Zernike coefficients becoming
 		// rotationally invariant
 		unsigned k = 0;
 		while( k < 2 and fa[ nfv[ _i ][0] ][k] == _i ) ++k;
@@ -601,7 +627,8 @@ private:
 };
 /** @example example_mesh.cc
  *
- *  This is an example of how to use the SignatureMeshT class.
+ *  This is an example of how to use the SignatureMeshT class together
+ *  with the SignatureT class and the compute_signature function.
  *
  *  @see signaturet.hh
  */

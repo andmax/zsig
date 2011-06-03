@@ -4,8 +4,8 @@
 
 #include <zsig.hh>
 
-#define DOMAIN_GRID_X 17
-#define DOMAIN_GRID_Y 17
+#define DOMAIN_GRID_X 9
+#define DOMAIN_GRID_Y 9
 #define SIGNATURE_TYPE long double
 
 typedef zsig::SignatureT< DOMAIN_GRID_X, DOMAIN_GRID_Y, SIGNATURE_TYPE > signature_type;
@@ -39,7 +39,7 @@ void generate_signature( signature_type& sig ) {
 int main( int argc, char *argv[] ) {
 
 	std::cout << "[zsig] Usage: " << argv[0] << " <no arguments expected>\n"
-		  << "[zsig] Example ** 3 ** Building Signature and Zernike Coefficients\n";
+		  << "[zsig] Example 3 :: Building Signature and Zernike Coefficients\n";
 
 	std::cout << "[zsig] Generating pyramid signature\n";
 
@@ -85,7 +85,7 @@ int main( int argc, char *argv[] ) {
 		for (unsigned gy = 0; gy < DOMAIN_GRID_Y; ++gy)
 			sig_pyramid[gx][gy] = (sig_pyramid[gx][gy] - mins) / (maxs - mins);
 
-	std::cout << "[zsig] Pyramid signature:\n\n";
+	std::cout << "[zsig] Reconstructed pyramid signature:\n\n";
 
 	std::cout << std::noshowpos << std::fixed << sig_pyramid << "\n\n";
 
