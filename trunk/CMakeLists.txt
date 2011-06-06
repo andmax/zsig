@@ -11,7 +11,6 @@ message(STATUS "Building in ${BUILDENV} Environment")
 
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 
-set(CMAKE_VERBOSE_MAKEFILE TRUE)
 set(CMAKE_BUILD_TYPE Release)
 
 set(BASE_FLAGS "-Wno-deprecated -march=native -mfpmath=sse -fopenmp")
@@ -27,13 +26,6 @@ set(CMAKE_CXX_FLAGS "${BASE_FLAGS}")
 set(CMAKE_CXX_FLAGS_RELEASE "${BASE_FLAGS} ${RELEASE_FLAGS}")
 set(CMAKE_CXX_FLAGS_DEBUG "${BASE_FLAGS} ${DEBUG_FLAGS}")
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${BASE_FLAGS} ${DEBUG_FLAGS} ${RELEASE_FLAGS}")
-
-# Set this variable to true if you want to compile examples using OpenGL + GLUT
-set(ENABLE_GL TRUE)
-
-if(APPLE AND ENABLE_GL)
-  set(CMAKE_CXX_LINK_FLAGS "-framework OpenGL -framework GLUT")
-endif(APPLE AND ENABLE_GL)
 
 set(INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include)
 

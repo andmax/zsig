@@ -24,10 +24,10 @@ namespace zsig {
 /** @relates ZernikePolynomialsBasisT
  *  @brief Compute factorial of n: \f$n!\f$
  *
+ *  @see ZernikePolynomialsBasisT
  *  @param[in] _n Number to compute the factorial of
  *  @return Factorial of n
- *  @tparam T defines number precision
- *  @see ZernikePolynomialsBasisT
+ *  @tparam T Defines number precision
  */
 template< class T >
 T fac( const int& _n ) {
@@ -50,12 +50,12 @@ T fac( const int& _n ) {
   \label{eq:Rpq}
  *  \f}
  *
+ *  @see ZernikePolynomialsBasisT
  *  @param[in] _p Radial order
  *  @param[in] _q Frequency repetition
  *  @param[in] _r Domain radius \f$\rho\f$ to compute the polynomial
  *  @return Radial Polynomial \f$R_{p}^{q}(\rho)\f$
- *  @tparam T defines number precision
- *  @see ZernikePolynomialsBasisT
+ *  @tparam T Defines number precision
  */
 template< class T >
 T compute_R( const unsigned& _p,
@@ -90,13 +90,13 @@ T compute_R( const unsigned& _p,
   V_{p}^{q}(\rho, \theta) = R_{p}^{q}(\rho) e^{iq\theta}
  *  \f}
  *
+ *  @see ZernikePolynomialsBasisT
  *  @param[in] _p Radial order
  *  @param[in] _q Frequency repetition
  *  @param[in] _r Domain radius \f$\rho\f$ to compute the polynomial
  *  @param[in] _t Domain angle \f$\theta\f$ to compute the polynomial
  *  @return Zernike Polynomial \f$V_{p}^{q}(\rho, \theta)\f$
- *  @tparam T defines number precision
- *  @see ZernikePolynomialsBasisT
+ *  @tparam T Defines number precision
  */
 template< class T >
 std::complex< T > compute_V( const unsigned& _p,
@@ -155,8 +155,8 @@ std::complex< T > compute_V( const unsigned& _p,
  *  \f$R_{p}^{q}(\rho)\f$ given in equation (2) of [Maximo:2011] and
  *  computed in @ref compute_R.
  *
- *  @tparam O defines Zernike target radial order
- *  @tparam T defines number precision
+ *  @tparam Order Defines Zernike target radial order
+ *  @tparam T Defines number precision
  */
 template< unsigned Order = 8, class T = long double >
 class ZernikePolynomialsBasisT {
@@ -228,6 +228,34 @@ public:
 				pol[p][qi] *= p1pi;
 			} // qi
 		} // p
+	}
+
+	/** @overload void project( const T **_fxy, zpolbasis_type **_zpb, const unsigned int& _szx, const unsigned int& _szy )
+	 *
+	 *  @param[in] _fxy Discrete function to look up values (at [x, y] or _fxy[x][y])
+	 *  @param[in] _zpb Zernike Polynomials Basis for each [x, y]
+	 *  @param[in] _szx Function domain size on the x-direction
+	 *  @param[in] _szy Function domain size on the y-direction
+	 */
+	void project( const T **_fxy,
+		      zpolbasis_type **_zpb,
+		      const unsigned int& _szx,
+		      const unsigned int& _szy ) {
+		project( _fxy, (const zpolbasis_type **)_zpb, _szx, _szy );
+	}
+
+	/** @overload void project( T **_fxy, const zpolbasis_type **_zpb, const unsigned int& _szx, const unsigned int& _szy )
+	 *
+	 *  @param[in] _fxy Discrete function to look up values (at [x, y] or _fxy[x][y])
+	 *  @param[in] _zpb Zernike Polynomials Basis for each [x, y]
+	 *  @param[in] _szx Function domain size on the x-direction
+	 *  @param[in] _szy Function domain size on the y-direction
+	 */
+	void project( T **_fxy,
+		      const zpolbasis_type **_zpb,
+		      const unsigned int& _szx,
+		      const unsigned int& _szy ) {
+		project( (const T **)_fxy, (const zpolbasis_type **)_zpb, _szx, _szy );
 	}
 
 	/** @overload void project( T **_fxy, zpolbasis_type **_zpb, const unsigned int& _szx, const unsigned int& _szy )
@@ -391,7 +419,7 @@ public:
 		T dist = (T)0; // distance
 		T modz[2]; // modulus of z
 		for (unsigned p = 0; p <= Order; ++p) {
-			for (int qi = 0; qi <= p/2; ++qi) {
+			for (unsigned qi = 0; qi <= p/2; ++qi) {
 				modz[0] = std::abs( pol[p][qi] );
 				modz[1] = std::abs( _zp[p][qi] );
 				dist += (modz[0] - modz[1] ) * (modz[0] - modz[1] );
@@ -416,33 +444,33 @@ public:
 
 	/** @brief Output stream operator
 	 *
-	 *  @param[in,out] out Output stream
+	 *  @param[in,out] _out Output stream
 	 *  @param[in] _z Zernike Polynomials Basis to output
 	 *  @return Output stream
 	 */
-	friend std::ostream& operator << ( std::ostream& out,
+	friend std::ostream& operator << ( std::ostream& _out,
 					   const zpolbasis_type& _z ) {
 		for (unsigned p = 0; p <= Order; ++p) {
-			out << _z[p][0];
+			_out << _z[p][0];
 			for (unsigned qi = 1; qi <= p/2; ++qi)
-				out << " " << _z[p][qi];
-			if( p < Order ) out << "\n";
+				_out << " " << _z[p][qi];
+			if( p < Order ) _out << "\n";
 		}
-		return out;
+		return _out;
 	}
 
 	/** @brief Input stream operator
 	 *
-	 *  @param[in,out] in Input stream
+	 *  @param[in,out] _in Input stream
 	 *  @param[out] _z Zernike Polynomials Basis to input
 	 *  @return Input stream
 	 */
-	friend std::istream& operator >> ( std::istream& in,
+	friend std::istream& operator >> ( std::istream& _in,
 					   zpolbasis_type& _z ) {
 		for (unsigned p = 0; p <= Order; ++p)
 			for (unsigned qi = 0; qi <= p/2; ++qi)
-				in >> _z[p][qi];
-		return in;
+				_in >> _z[p][qi];
+		return _in;
 	}
 
 private:
@@ -484,12 +512,12 @@ private:
  *  qi[0, 1, 2]) and not: q[-4, -2, 0, 2, 4]; since the conjugate of q
  *  and -q are the same V_{p}^{q} = V*_{p}^{-q}.
  *
+ *  @see ZernikePolynomialsBasisT
  *  @param[out] _zpb Zernike Polynomials Basis for each [x, y]
  *  @param[in] _szx Domain size of the x-direction
  *  @param[in] _szy Domain size of the y-direction
- *  @tparam O defines Zernike target radial order
- *  @tparam T defines number precision
- *  @see ZernikePolynomialsBasisT
+ *  @tparam O Defines Zernike target radial order
+ *  @tparam T Defines number precision
  */
 template< unsigned Order, class T >
 void compute_basis( ZernikePolynomialsBasisT< Order, T > **_zpb,

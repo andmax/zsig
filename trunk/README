@@ -39,3 +39,27 @@ Installation:
     The code is still in polishing process; the Zernike code is
     somewhat ok, but I still need to polish the Signatures code and
     upload it to this repository.
+
+Running tests:
+
+    To run a number of tests in this project, do:
+
+    <in project root directory>
+    $ mkdir build
+    $ cd build
+    $ cmake ..
+    $ make
+
+    After that, the binaries are created in ../bin and can be executed
+    in any order:
+
+    <remove argument 1 to not write output files>
+    $ ../bin/ex1 1
+    $ ../bin/ex2 1
+    $ ../bin/ex3
+    $ ../bin/ex4 1
+
+    There are also a number of applications to use in ../bin; to
+    understand better each example and application see the
+    corresponding source file in ../src and library header in
+    ../include.
