@@ -27,9 +27,9 @@ namespace zsig {
 /** @class SignatureT signaturet.hh
  *  @brief Signature class
  *
- *  Signature of a vertex is a "snapshot" of the surface surrounding
- *  that vertex, that is a scalar field described by a matrix stored
- *  in this class.
+ *  Signature of a vertex is a descriptor of the surface surrounding
+ *  that vertex, in practice it is a scalar field described by a
+ *  matrix stored in this class.
  *
  *  @tparam R Signature row dimension
  *  @tparam C Signature column dimension
@@ -162,8 +162,9 @@ private:
  *
  *  This is a simple mesh class to support vertex signatures (see
  *  SignatureT class for more details) based on the tangent plane
- *  defined for a vertex.
+ *  defined for a mesh vertex.
  *
+ *  @see SignatureT
  *  @tparam T Mesh coordinate values type
  */
 template< class T >
@@ -217,7 +218,7 @@ public:
 		return *this;
 	}
 
-	// @name IO functions
+	// @name I/O functions
 	//@{
 
 	/** @brief Read an OFF (Object File Format) to this mesh
@@ -249,7 +250,7 @@ public:
 	/** @brief Write an OFF (Object File Format) with this mesh
 	 *  @param[in,out] _out The output stream to write the mesh to
 	 */
-	void write_off( std::ostream& _out ) {
+	void write_off( std::ostream& _out ) const {
 		_out << "OFF\n" << nv << " " << nf << " 0\n";
 		for (unsigned i = 0; i < nv; ++i)
 			_out << va[i] << "\n";
@@ -257,12 +258,40 @@ public:
 			_out << "3 " << fa[i] << "\n";
 	}
 
-	/** @overload void write_off( const char* fn )
+	/** @overload void write_off( const char* fn ) const
 	 *  @param[in] fn File name to be written
 	 */
-	void write_off( const char* fn ) {
+	void write_off( const char* fn ) const {
 		std::fstream out( fn, std::ios::out );
 		write_off( out );
+		out.close();
+	}
+
+	/** @brief Write a PLY (Polygon File Format) with this mesh
+	 *  @param[in,out] _out The output stream to write the mesh to
+	 *  @param[in] _colors Vertex colors to output together with the mesh
+	 */
+	void write_ply( std::ostream& _out, const uvec3 *_colors ) const {
+		_out << "ply\nformat ascii 1.0\n";
+		_out << "element vertex " << nv << " \n";
+		_out << "property float x\nproperty float y\nproperty float z\n";
+		_out << "property uchar red\nproperty uchar green\nproperty uchar blue\n";
+		_out << "element face " << nf << " \n";
+		_out << "property list uchar int vertex_indices\n";
+		_out << "end_header\n";
+		for (unsigned i = 0; i < nv; ++i)
+			_out << va[i] << " " << _colors[i] << "\n";
+		for (unsigned i = 0; i < nf; ++i)
+			_out << "3 " << fa[i] << "\n";
+	}
+
+	/** @overload void write_ply( const char* fn, const uvec3 *_colors ) const
+	 *  @param[in] fn File name to be written
+	 *  @param[in] _colors Vertex colors to output together with the mesh
+	 */
+	void write_ply( const char* fn, const uvec3 *_colors ) const {
+		std::fstream out( fn, std::ios::out );
+		write_ply( out, _colors );
 		out.close();
 	}
 
@@ -271,12 +300,29 @@ public:
 	// @name Build functions
 	//@{
 
+	/** @brief Build all auxiliary information regarding this mesh
+	 *
+	 *  This method invokes all build methods of the mesh in order
+	 *  to set up all the pre-computation steps.  It uses the
+	 *  default argument value for all build functions (when
+	 *  required).
+	 */
+	void build_all( void ) {
+		build_bbox();
+		build_neighborhood();
+		build_fnormals();
+		build_grid();
+	}
+
 	/** @brief Build 3D regular grid (with faces) for neighborhood searching
 	 *  @param[in,out] _msd Maximum search distance (using grid) for neighbors (default returns 2.5% of the diagonal bounding box)
 	 */
 	void build_grid( T& _msd ) {
 		if( gfa ) delete [] gfa;
-		gd = ceil( (T)1 / _msd );
+		T msl = diag[0]; // maximum side length
+		msl = std::max( msl, diag[1] );
+		msl = std::max( msl, diag[2] );
+		gd = ceil( msl / _msd );
 		gfa = new std::vector< unsigned >[ gd * gd * gd ];
 		uvec3 gp; // grid position
 		for (unsigned i = 0; i < nf; ++i) {
@@ -343,21 +389,23 @@ public:
 	// @name Compute functions
 	//@{
 
-	/** @brief Compute neighborhood of faces for a given vertex
+	/** @brief Compute neighborhood of faces (or vertices) for a given vertex
 	 *
 	 *  To work properly, this method needs building the mesh's
 	 *  regular grid for neighborhood searching (see @ref
 	 *  build_grid).
 	 *
 	 *  @param[in] _i Index of the vertex to compute neighborhood
-	 *  @param[out] _nf Neighborhood of faces to consider around vertex _i
+	 *  @param[out] _nb Neighborhood of faces (or vertices) to consider around vertex _i
+	 *  @param[in] _v Return vertices neighborhood (default: false returns faces)
 	 */
 	void compute_neighborhood( const unsigned& _i,
-				   std::set< unsigned >& _nf ) const {
+				   std::set< unsigned >& _nb,
+				   const bool& _v = false ) const {
 		vec3 v = va[ _i ]; // vertex position
 		uvec3 gp; // grid position of vertex
 		convert_to_grid( v, gp );
-		_nf.clear();
+		_nb.clear();
 		for (unsigned ci = std::max((int)gp[0]-1, 0); ci <= std::min((int)gp[0]+1, (int)gd-1); ++ci) {
 			for (unsigned cj = std::max((int)gp[1]-1, 0); cj <= std::min((int)gp[1]+1, (int)gd-1); ++cj) {
 				for (unsigned ck = std::max((int)gp[2]-1, 0); ck <= std::min((int)gp[2]+1, (int)gd-1); ++ck) {
@@ -365,7 +413,14 @@ public:
 						unsigned fi = gfa[ci*gd*gd+cj*gd+ck][i];
 						for (unsigned vi = 0; vi < 3; ++vi) {
 							vec3 ov = va[ fa[fi][vi] ];
-							if( (ov - v).length() <= msd ) { _nf.insert( fi ); break; }
+							if( (ov - v).length() <= msd ) {
+								if( _v ) {
+									_nb.insert( fa[fi][vi] );
+								} else {
+									_nb.insert( fi );
+									break;
+								} // else
+							} // if
 						} // vi
 					} // i
 				} // ck
@@ -642,13 +697,14 @@ private:
  *  surface.  The signature is a heightmap image representing the
  *  surface neighborhood of the vertex.
  *
+ *  @see SignatureT
+ *  @see SignatureMeshT
  *  @param _sig Signature to return
  *  @param _m Mesh surface to compute heightmap signature of
  *  @param _i Index of the vertex in the mesh to compute the signature of
  *  @tparam R Signature row dimension
  *  @tparam C Signature column dimension
  *  @tparam T Signature value type
- *  @see SignatureMeshT @see SignatureT
  */
 template< unsigned R, unsigned C, class T >
 void compute_signature( SignatureT< R, C, T >& _sig,
@@ -750,6 +806,8 @@ void compute_signature( SignatureT< R, C, T >& _sig,
 
 	bp = pq[0] + ( di * 0.5 ) + ( dj * 0.5 ); // base point at the center of cell
 	vZ = sp[3]; // tangent normal
+
+	_sig.clear();
 
 	for (gi = 0; gi < R; ++gi) { // for each grid row
 

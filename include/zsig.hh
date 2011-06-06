@@ -2,8 +2,11 @@
  *  @file zsig.hh
  *  @brief Zernike-based Vertex Signatures definition
  *  @author Andre Maximo
- *  @date May, 2011
+ *  @date November, 2009
  */
+
+#ifndef ZSIG_HH
+#define ZSIG_HH
 
 /*! @mainpage zsig Library
 
@@ -27,7 +30,39 @@ Processing" available in:
 
 \section structure Library Structure
 
-The zsig library is built...
+The zsig library is built in functions and classes making available a
+simple signature-mesh datastructure in form of a class named:
+zsig::SignatureMeshT.  The Zernike-polynomials computation is encoded
+in three basic functions, one class, and one advanced function.  The
+three basic functions (zsig::fac, zsig::compute_R and zsig::compute_V)
+are devoted to compute the radial and Zernike polynomial.  The
+zsig::ZernikePolynomialsBasisT class provides methods to project,
+reconstruct and compare a given function.  The zsig::compute_basis
+advanced function computes the orthogonal basis of the Zernike
+polynomials.
+
+In the zsig library the signature is defined as a scalar-field
+descriptor in form of a matrix stored in a class named:
+zsig::SignatureT.  This class is essentially a wrapper for a simple 2D
+matrix of values.  Following the idea of simplicity, the
+zsig::SignatureMeshT class provides methods for input/output
+operations, methods to build auxiliary mesh information and compute
+additional surface information, and other methods to set and get mesh
+data.  On top of the zsig::SignatureT and zsig::SignatureMeshT
+classes, the zsig::copmute_signature advanced function computes a
+vertex signature based on the tangent plane at that vertex and a ray
+shooting algorithm.  This algorithm computes a heightmap image for a
+given vertex enconding the surface neighborhood as a signature.
+
+Finally, the zsig library provides three advanced functions to compute
+the set of signatures of a given mesh.  The zsig::compute_sig function
+computes the heightmap-based signatures for all mesh vertices.  The
+zsig::compute_zsig function computes the Zernike-based signatures for
+all mesh vertices.  And the zsig::compute_gwzsig function computes the
+Gaussian-weighted Zernike-based signatures for all mesh vertices.
+
+For more information on each class and function see the individual
+documentation pages and the respective examples.
 
 \section usage How to use
 
@@ -52,11 +87,7 @@ from the following link:
 http://www.impa.br/~andmax/libs/zsig-1.0.0.tgz
 
 Note that this tarball file may be behind the source code version on
-the svn repository.
-
-\section history Version history
-
-\li 1.0.0 ::
+the svn repository on Google code.
 
 \section acknowledgments Acknowledgments
 
@@ -82,14 +113,233 @@ Project Supervisor:
 
 */
 
-#ifndef ZSIG_HH
-#define ZSIG_HH
-
 //== INCLUDES =================================================================
 
 #include <zpolbasist.hh>
 #include <signaturet.hh>
 
+//== NAMESPACES ===============================================================
+
+namespace zsig {
+
+//=== IMPLEMENTATION ==========================================================
+
+/** @relates SignatureMeshT
+ *  @brief Compute Heightmap Signature for vertices
+ *
+ *  Given a mesh _m, compute the heightmap-based signatures for all
+ *  mesh vertices.  The output is a vector of heightmap signatures
+ *  _sig.
+ *
+ *  @see SignatureT
+ *  @see SignatureMeshT
+ *  @param[out] _sig Heightmap-based vertex signatures
+ *  @param[in] _m Mesh to compute signatures of vertices
+ *  @tparam R Signature row dimension
+ *  @tparam C Signature column dimension
+ *  @tparam T Signature value type
+ */
+template< unsigned R, unsigned C, class T >
+void compute_sig( std::vector< SignatureT< R, C, T > >& _sig,
+		  const SignatureMeshT< T >& _m ) {
+
+	_sig.clear();
+
+	// vector resize method is not working with signature class,
+	// something is wrong with operator new I guess:
+	// _sig.resize( _m.size_of_vertices() );
+
+	_sig.reserve( _m.size_of_vertices() );
+	for (unsigned vid = 0; vid < _m.size_of_vertices(); ++vid)
+		_sig.push_back( SignatureT< R, C, T >() );
+
+	for (unsigned vid = 0; vid < _m.size_of_vertices(); ++vid)
+		compute_signature( _sig[vid], _m, vid );
+
+}
+
+/** @relates SignatureMeshT
+ *  @relatesalso ZernikePolynomialsBasisT
+ *  @brief Compute Zernike Signature for vertices
+ *
+ *  Given a mesh _m and the Heighmap-based vertex signatures _sig (see
+ *  compute_sig function), compute the Zernike-based vertex signatures
+ *  for all mesh vertices.  The output is a vector of Zernike
+ *  signatures _zsig.
+ *
+ *  @see SignatureT
+ *  @see SignatureMeshT
+ *  @see ZernikePolynomialsBasisT
+ *  @param[out] _zsig Zernike-based vertex signatures
+ *  @param[in] _m Mesh to compute signatures of vertices
+ *  @param[in] _sig Heightmap-based vertex signatures previous computed
+ *  @tparam Order Defines Zernike target radial order
+ *  @tparam T Signature value type
+ *  @tparam R Signature row dimension
+ *  @tparam C Signature column dimension
+ */
+template< unsigned Order, class T, unsigned R, unsigned C >
+void compute_zsig( std::vector< ZernikePolynomialsBasisT< Order, T > >& _zsig,
+		   const SignatureMeshT< T >& _m,
+		   const std::vector< SignatureT< R, C, T > >& _sig ) {
+
+	typedef ZernikePolynomialsBasisT< Order, T > zpolbasis_type;
+	typedef SignatureT< R, C, zpolbasis_type > zsig_type;
+	typedef SignatureT< R, C, T > signature_type;
+
+	_zsig.clear();
+	_zsig.resize( _m.size_of_vertices() );
+
+	zsig_type ZernikeBasis;
+
+	compute_basis( &ZernikeBasis, R, C );
+
+	for (unsigned vid = 0; vid < _m.size_of_vertices(); ++vid)
+		_zsig[vid].project( &_sig[vid], &ZernikeBasis, R, C );
+
+}
+
+/** @relates SignatureMeshT
+ *  @relatesalso ZernikePolynomialsBasisT
+ *  @overload
+ *
+ *  @see SignatureT
+ *  @see SignatureMeshT
+ *  @see ZernikePolynomialsBasisT
+ *  @param[out] _zsig Zernike-based vertex signatures
+ *  @param[in] _m Mesh to compute signatures of vertices
+ *  @tparam Order Defines Zernike target radial order
+ *  @tparam T Signature value type
+ *  @tparam R Signature row dimension
+ *  @tparam C Signature column dimension
+ */
+template< unsigned Order, class T, unsigned R, unsigned C >
+void compute_zsig( std::vector< ZernikePolynomialsBasisT< Order, T > >& _zsig,
+		   const SignatureMeshT< T >& _m ) {
+
+	std::vector< SignatureT< R, C, T > > _sig;
+
+	compute_sig< R, C, T >( _sig, _m );
+
+	compute_zsig< Order, T, R, C >( _zsig, _m, _sig );
+
+}
+
+/** @relates SignatureMeshT
+ *  @relatesalso ZernikePolynomialsBasisT
+ *  @brief Compute Gaussian-weighted Zernike Signature for vertices
+ *
+ *  Given a mesh _m and the Zernike-based vertex signatures _zsig (see
+ *  compute_zsig function), compute the Gaussian-weighted
+ *  Zernike-based vertex signatures for all mesh vertices.  The output
+ *  is a vector of Gaussian-weighted Zernike signatures _gwzsig.
+ *
+ *  @see SignatureT
+ *  @see SignatureMeshT
+ *  @see ZernikePolynomialsBasisT
+ *  @param[out] _gwzsig Gaussian-weighted Zernike-based vertex signatures
+ *  @param[in] _m Mesh to compute signatures of vertices
+ *  @param[in] _zsig Zernike-based vertex signatures previous computed
+ *  @tparam Order Defines Zernike target radial order
+ *  @tparam T Signature value type
+ *  @tparam R Signature row dimension
+ *  @tparam C Signature column dimension
+ */
+template< unsigned Order, class T, unsigned R, unsigned C >
+void compute_gwzsig( std::vector< ZernikePolynomialsBasisT< Order, T > >& _gwzsig,
+		     const SignatureMeshT< T >& _m,
+		     const std::vector< ZernikePolynomialsBasisT< Order, T > >& _zsig ) {
+
+	typedef ZernikePolynomialsBasisT< Order, T > zpolbasis_type;
+	typedef SignatureT< R, C, zpolbasis_type > zsig_type;
+	typedef SignatureT< R, C, T > signature_type;
+
+	typedef typename SignatureMeshT< T >::vec3 vec3;
+
+	// Gaussian-weighted Zernike coefficients to be returned
+	_gwzsig.clear();
+	_gwzsig.resize( _m.size_of_vertices() );
+
+	std::set< unsigned > nv; // neighborhood of vertices to be consider around vertex
+
+	T gsigma = _m.maximum_search_distance() / (T)2; // Gaussian sigma
+
+	T gw, coff = (T)2 * gsigma * gsigma; // Gaussian weight and cut-off
+
+	vec3 v, ov; // current and other vertices
+
+	for (unsigned vid = 0; vid < _m.size_of_vertices(); ++vid) {
+
+		_m.compute_neighborhood( vid, nv, true );
+
+		T den = (T)0; // Gaussian normalization factor (denominator)
+
+		v = _m.vertices()[vid];
+
+		for (std::set< unsigned >::iterator sit = nv.begin(); sit != nv.end(); ++sit) {
+
+			ov = _m.vertices()[*sit];
+
+			gw = std::exp( - ( ov - v ).sqrl() / coff );
+
+			for (unsigned p = 0; p <= Order; ++p)
+				for (unsigned qi = 0; qi <= p/2; ++qi)
+					_gwzsig[vid][p][qi] += _zsig[*sit][p][qi] * gw;
+
+			den += gw;
+
+		} // sit
+
+		for (unsigned p = 0; p <= Order; ++p)
+			for (unsigned qi = 0; qi <= p/2; ++qi)
+				_gwzsig[vid][p][qi] /= den;
+
+	} // vid
+
+}
+/** @example app_compute_signature.cc
+ *
+ *  This is an application example of the compute_gwzsig function
+ *  usage and SignatureMeshT class.
+ *
+ *  @see zsig.hh
+ */
+
+/** @relates SignatureMeshT
+ *  @relatesalso ZernikePolynomialsBasisT
+ *  @overload
+ *
+ *  @see SignatureT
+ *  @see SignatureMeshT
+ *  @see ZernikePolynomialsBasisT
+ *  @param[out] _gwzsig Gaussian-weighted Zernike-based vertex signatures
+ *  @param[in] _m Mesh to compute signatures of vertices
+ *  @tparam Order Defines Zernike target radial order
+ *  @tparam T Signature value type
+ *  @tparam R Signature row dimension
+ *  @tparam C Signature column dimension
+ */
+template< unsigned Order, class T, unsigned R, unsigned C >
+void compute_gwzsig( std::vector< ZernikePolynomialsBasisT< Order, T > >& _gwzsig,
+		     const SignatureMeshT< T >& _m ) {
+
+	std::vector< ZernikePolynomialsBasisT< Order, T > > _zsig;
+
+	compute_zsig< Order, T, R, C >( _zsig, _m );
+
+	compute_gwzsig< Order, T, R, C >( _gwzsig, _m, _zsig );
+
+}
+/** @example app_paint_signature.cc
+ *
+ *  This is an application example to paint a given mesh using
+ *  previously computed Zernike-based vertex signatures.
+ *
+ *  @see zsig.hh
+ */
+
+//=============================================================================
+} // namespace zsig
 //=============================================================================
 #endif // ZSIG_HH
 //=============================================================================

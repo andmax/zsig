@@ -139,6 +139,8 @@ int main( int argc, char *argv[] ) {
 	std::cout << "[zsig] Middle vertex ('vale') signature:\n\n";
 
 	std::cout << std::noshowpos << sig << "\n\n";
+
+	std::cout << "[zsig] Where signature infinity value is: " << 1.5 * mesh.maximum_search_distance() << "\n";
  
 	std::cout << "[zsig] Done!\n";
 

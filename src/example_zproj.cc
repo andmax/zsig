@@ -33,6 +33,7 @@ void generate_gray_image( pgmimg& img, const unsigned& example ) {
 			if( example == 0 ) gray = (unsigned char)( 255 * (x*x) );
 			else if( example == 1 ) gray = (unsigned char)( 255 * (y*y) );
 			else if( example == 2 ) gray = (unsigned char)( 255 * (r*r) );
+			else gray = 0.f;
 
 			if( r > 1.f ) gray = 0.f;
 
