@@ -39,9 +39,9 @@ T fac( const int& _n ) {
 /** @relates ZernikePolynomialsBasisT
  *  @brief Compute Radial Polynomial: \f$R_{p}^{q}(\rho)\f$
  *
- *  This function computes the value returned by equation (1) from
- *  [Maximo:2011], that is the Radial Polynomial associated with order
- *  \f$p\f$ and repetition \f$q\f$ as follows:
+ *  This function computes the value returned by equation (1) below
+ *  (see [Maximo:2011]), that is the Radial Polynomial associated with
+ *  order \f$p\f$ and repetition \f$q\f$ as follows:
  *
  *  \f{equation}{
   R_{p}^{q}(\rho) = \mathop{\sum_{k=|q|}^{p}}_{|p-q| \mathrm{even}}
@@ -82,9 +82,9 @@ T compute_R( const unsigned& _p,
 /** @relates ZernikePolynomialsBasisT
  *  @brief Compute Zernike Polynomial: \f$V_{p}^{q}(\rho, \theta)\f$
  *
- *  This function computes the value returned by equation (2) from
- *  [Maximo:2011], that is the Zernike Polynomial associated with
- *  order \f$p\f$ and repetition \f$q\f$ as follows:
+ *  This function computes the value returned by equation (2) below
+ *  (see [Maximo:2011]), that is the Zernike Polynomial associated
+ *  with order \f$p\f$ and repetition \f$q\f$ as follows:
  *
  *  \f{equation}{
   V_{p}^{q}(\rho, \theta) = R_{p}^{q}(\rho) e^{iq\theta}
@@ -149,11 +149,12 @@ std::complex< T > compute_V( const unsigned& _p,
   issn = {1524-0703},
   doi = {http://dx.doi.org/10.1016/j.gmod.2011.05.002}
 }   @endverbatim
+
  *  @note For higher order Zernike Polynomials high-precision number
  *  type is required.  For instance, eighth-order basis reaches big
  *  numbers when computing the factorial for the radial polynomial
- *  \f$R_{p}^{q}(\rho)\f$ given in equation (2) of [Maximo:2011] and
- *  computed in @ref compute_R.
+ *  \f$R_{p}^{q}(\rho)\f$ given in equation (2) computed in @ref
+ *  compute_R (see [Maximo:2011]).
  *
  *  @tparam Order Defines Zernike target radial order
  *  @tparam T Defines number precision
@@ -181,7 +182,7 @@ public:
 	 *
 	 *  This method projects a function onto the Zernike
 	 *  Polynomials Orthogonal Basis as described in equation (3)
-	 *  from [Maximo:2011] (the discrete version).  This
+	 *  below (see [Maximo:2011] -- the discrete version).  This
 	 *  projection is the \f$(z_{p}^{q}(f))[x,y]\f$ associated
 	 *  with all possible orders \f$p\f$ and repetitions \f$q\f$
 	 *  as follows:
@@ -492,10 +493,10 @@ private:
  *  @brief Compute Discrete Zernike Basis: all \f$(V_{p}^{q})[x,y]\f$
  *
  *  This function computes the orthogonal basis used in equation (3)
- *  from [Maximo:2011] (the discrete version), that is the Zernike
- *  basis \f$(V_{p}^{q})[x,y]\f$ associated with all possible orders
- *  \f$p\f$ and repetitions \f$q\f$ related with the target function
- *  \f$f(x,y)\f$ to be projected, as follows:
+ *  below (from [Maximo:2011] -- the discrete version), that is the
+ *  Zernike basis \f$(V_{p}^{q})[x,y]\f$ associated with all possible
+ *  orders \f$p\f$ and repetitions \f$q\f$ related with the target
+ *  function \f$f(x,y)\f$ to be projected, as follows:
  *
  *  \f{equation}{
   z_{p}^{q}(f) = \frac{p+1}{\pi} \sum_{ (x,y) \in \mathbf{S} }

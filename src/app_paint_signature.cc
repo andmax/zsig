@@ -61,14 +61,6 @@ void scalar_to_rgb( const VALUE_TYPE& scalar,
 
 }
 
-/// STD STL pair comparison for sorting is not working...
-bool less_pair( const std::pair< VALUE_TYPE, uint >& _p1, const std::pair< VALUE_TYPE, uint >& _p2 ) {
-
-	if( _p1.first == _p2.first ) return _p1.second < _p2.second;
-	return _p1.first < _p2.first;
-
-}
-
 // Main
 int main( int argc, char *argv[] ) {
 
@@ -141,7 +133,7 @@ int main( int argc, char *argv[] ) {
 	for (unsigned i = 0; i < nv; ++i)
 		diff_values[i] = std::make_pair( gwzsig[i].compare( gwzsig[vid] ), i );
 
-	std::sort( diff_values.begin(), diff_values.end(), less_pair );
+	std::sort( diff_values.begin(), diff_values.end() );
 
 	std::cout << "[zsig] Painting mesh\n";
 

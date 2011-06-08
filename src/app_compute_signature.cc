@@ -67,9 +67,8 @@ int main( int argc, char *argv[] ) {
 	    << sizeof(VALUE_TYPE) // value type size in bytes
 	    << "\n";
 
-	out << gwzsig[0];
-	for (unsigned vid = 1; vid < mesh.size_of_vertices(); ++vid)
-		out << " " << gwzsig[vid];
+	for (unsigned vid = 0; vid < mesh.size_of_vertices(); ++vid)
+		out << gwzsig[vid] << "\n";
 
 	out.close();
 

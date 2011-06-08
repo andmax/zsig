@@ -17,7 +17,7 @@ typedef zsig::ZernikePolynomialsBasisT< ZERNIKE_ORDER, SIGNATURE_TYPE > zpolbasi
 
 typedef zsig::SignatureT< DOMAIN_GRID_X, DOMAIN_GRID_Y, zpolbasis_type > zsig_type;
 
-/// Generate an example signature (in form of a hat)
+// Generate an example signature (in form of a hat)
 void generate_signature( signature_type& sig ) {
 
 	for (int i = 0; i < DOMAIN_GRID_X; ++i) {
