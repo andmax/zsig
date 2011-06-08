@@ -34,10 +34,10 @@ The zsig library is built in functions and classes making available a
 simple signature-mesh datastructure in form of a class named:
 zsig::SignatureMeshT.  The Zernike-polynomials computation is encoded
 in three basic functions, one class, and one advanced function.  The
-three basic functions (zsig::fac, zsig::compute_R and zsig::compute_V)
+three basic functions (@ref fac, @ref compute_R and @ref compute_V)
 are devoted to compute the radial and Zernike polynomial.  The
 zsig::ZernikePolynomialsBasisT class provides methods to project,
-reconstruct and compare a given function.  The zsig::compute_basis
+reconstruct and compare a given function.  The @ref compute_basis
 advanced function computes the orthogonal basis of the Zernike
 polynomials.
 
@@ -49,16 +49,16 @@ zsig::SignatureMeshT class provides methods for input/output
 operations, methods to build auxiliary mesh information and compute
 additional surface information, and other methods to set and get mesh
 data.  On top of the zsig::SignatureT and zsig::SignatureMeshT
-classes, the zsig::copmute_signature advanced function computes a
-vertex signature based on the tangent plane at that vertex and a ray
-shooting algorithm.  This algorithm computes a heightmap image for a
-given vertex enconding the surface neighborhood as a signature.
+classes, the @ref compute_signature advanced function computes a
+vertex signature based on the tangent plane at that vertex and a
+ray-shooting algorithm.  This algorithm computes a heightmap image for
+a given vertex enconding the surface neighborhood as a signature.
 
 Finally, the zsig library provides three advanced functions to compute
-the set of signatures of a given mesh.  The zsig::compute_sig function
+the set of signatures of a given mesh.  The @ref compute_sig function
 computes the heightmap-based signatures for all mesh vertices.  The
-zsig::compute_zsig function computes the Zernike-based signatures for
-all mesh vertices.  And the zsig::compute_gwzsig function computes the
+@ref compute_zsig function computes the Zernike-based signatures for
+all mesh vertices.  And the @ref compute_gwzsig function computes the
 Gaussian-weighted Zernike-based signatures for all mesh vertices.
 
 For more information on each class and function see the individual
@@ -76,7 +76,7 @@ The source code of the zsig library is available under the <em>GNU
 General Public License version 3</em>, refer to the COPYING file for
 more details.
 
-The zsig library can be downloaded from google code following the link:
+The zsig library can be downloaded following the link:
 
 \htmlonly <a href="https://code.google.com/p/zsig" target="_blank">Google Code: code.google.com/p/zsig</a> \endhtmlonly
 \latexonly \href{https://code.google.com/p/zsig}{Google Code: code.google.com/p/zsig} \endlatexonly
@@ -93,13 +93,13 @@ the svn repository on Google code.
 
 This library was developed during the doctorate internship research of
 Andre Maximo at GVIL under the supervision of Professor Amitabh
-Varshney.  We acknowledge the grant to the student (\a sandwich
-doctorate) provided by Brazilian research agency CNPq (National
-Counsel of Technological and Scientific Development).
+Varshney.  We acknowledge the grant to the student (scholarship named
+\a sandwich doctorate) provided by Brazilian research agency CNPq
+(National Counsel of Technological and Scientific Development).
 
 \section credits Credits
 
-The people involved in the project of this library is listed below:
+The people involved in the project of this library are listed below:
 
 Main Code:
 \par
@@ -230,9 +230,17 @@ void compute_zsig( std::vector< ZernikePolynomialsBasisT< Order, T > >& _zsig,
  *  @brief Compute Gaussian-weighted Zernike Signature for vertices
  *
  *  Given a mesh _m and the Zernike-based vertex signatures _zsig (see
- *  compute_zsig function), compute the Gaussian-weighted
+ *  @ref compute_zsig function), compute the Gaussian-weighted
  *  Zernike-based vertex signatures for all mesh vertices.  The output
- *  is a vector of Gaussian-weighted Zernike signatures _gwzsig.
+ *  is a vector of Gaussian-weighted Zernike signatures _gwzsig.  This
+ *  new vector of Zernike coefficients is computed using equation (1)
+ *  below (see [Maximo:2011] cited in @ref ZernikePolynomialsBasisT)
+ *  as follows:
+ *
+ * \f{equation}{
+ \mathbf{z}_{i}^{\sigma} = 
+ \frac{ \sum_{ v_{j} \in \mathcal{N}(v_{i}, 2\sigma)} \mathbf{z}_{i} \; e^{- \frac{\left|v_{i} - v_{j}\right|^{2}}{2\sigma^{2}}} }{\sum_{ v_{j} \in \mathcal{N}(v_{i}, 2\sigma)} e^{- \frac{\left|v_{i} - v_{j}\right|^{2}}{2\sigma^{2}}} }
+ * \f}
  *
  *  @see SignatureT
  *  @see SignatureMeshT
@@ -299,7 +307,7 @@ void compute_gwzsig( std::vector< ZernikePolynomialsBasisT< Order, T > >& _gwzsi
 }
 /** @example app_compute_signature.cc
  *
- *  This is an application example of the compute_gwzsig function
+ *  This is an application example of the @ref compute_gwzsig function
  *  usage and SignatureMeshT class.
  *
  *  @see zsig.hh
