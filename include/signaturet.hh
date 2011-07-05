@@ -273,10 +273,10 @@ public:
 	 */
 	void write_ply( std::ostream& _out, const uvec3 *_colors ) const {
 		_out << "ply\nformat ascii 1.0\n";
-		_out << "element vertex " << nv << " \n";
+		_out << "element vertex " << nv << "\n";
 		_out << "property float x\nproperty float y\nproperty float z\n";
 		_out << "property uchar red\nproperty uchar green\nproperty uchar blue\n";
-		_out << "element face " << nf << " \n";
+		_out << "element face " << nf << "\n";
 		_out << "property list uchar int vertex_indices\n";
 		_out << "end_header\n";
 		for (unsigned i = 0; i < nv; ++i)
