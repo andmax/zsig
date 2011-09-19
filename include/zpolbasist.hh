@@ -31,9 +31,9 @@ namespace zsig {
  */
 template< class T >
 T fac( const int& _n ) {
-	T f = (T)1;
-	for (int i = 2; i <= _n; ++i) f *= i;
-	return f;
+    T f = (T)1;
+    for (int i = 2; i <= _n; ++i) f *= i;
+    return f;
 }
 
 /** @relates ZernikePolynomialsBasisT
@@ -59,23 +59,23 @@ T fac( const int& _n ) {
  */
 template< class T >
 T compute_R( const unsigned& _p,
-	     const int& _q,
-	     const T& _r ) {
+             const int& _q,
+             const T& _r ) {
 
-	int a, b, c, d;
-	T sum = (T)0;
+    int a, b, c, d;
+    T sum = (T)0;
 
-	for (int k = (_q<0?-_q:_q); k <= _p; k += 2) {
+    for (int k = (_q<0?-_q:_q); k <= _p; k += 2) {
 
-		a = (_p - k) / 2; b = (_p + k) / 2;
-		c = (k - _q) / 2; d = (k + _q) / 2;
+        a = (_p - k) / 2; b = (_p + k) / 2;
+        c = (k - _q) / 2; d = (k + _q) / 2;
 
-		sum += ( ( pow( (T)-1.0, (T)a ) * fac<T>(b) ) /
-			 ( fac<T>(a) * fac<T>(c) * fac<T>(d) ) ) * pow( _r, (T)k );
+        sum += ( ( pow( (T)-1.0, (T)a ) * fac<T>(b) ) /
+             ( fac<T>(a) * fac<T>(c) * fac<T>(d) ) ) * pow( _r, (T)k );
 
-	}
+    }
 
-	return sum;
+    return sum;
 
 }
 
@@ -100,11 +100,11 @@ T compute_R( const unsigned& _p,
  */
 template< class T >
 std::complex< T > compute_V( const unsigned& _p,
-			     const int& _q,
-			     const T& _r,
-			     const T& _t ) {
+                             const int& _q,
+                             const T& _r,
+                             const T& _t ) {
 
-	return std::polar( compute_R<T>( _p, _q, _r), _q * _t );
+    return std::polar( compute_R<T>( _p, _q, _r), _q * _t );
 
 }
 
@@ -164,319 +164,319 @@ class ZernikePolynomialsBasisT {
 
 public:
 
-	typedef ZernikePolynomialsBasisT< Order, T > zpolbasis_type; ///< This class type
-	typedef std::complex< T > value_type; ///< Polynomial value type
-	typedef std::vector< value_type > radial_polynomial; ///< Radial polynomial
+    typedef ZernikePolynomialsBasisT< Order, T > zpolbasis_type; ///< This class type
+    typedef std::complex< T > value_type; ///< Polynomial value type
+    typedef std::vector< value_type > radial_polynomial; ///< Radial polynomial
 
-	/** @brief Default Constructor
-	 *
-	 *  This class does not store: q[-4, -2, 0, 2, 4] instead it
-	 *  stores only: q[0, 2, 4]; since the complex conjugate of q
-	 *  and -q are the same V_{p}^{q} = V*_{p}^{-q}.
-	 */
-	ZernikePolynomialsBasisT() : pol(Order+1) {
-		for (unsigned p = 0; p <= Order; ++p) pol[p].resize( 1+p/2 );
-	}
+    /** @brief Default Constructor
+     *
+     *  This class does not store: q[-4, -2, 0, 2, 4] instead it
+     *  stores only: q[0, 2, 4]; since the complex conjugate of q
+     *  and -q are the same V_{p}^{q} = V*_{p}^{-q}.
+     */
+    ZernikePolynomialsBasisT() : pol(Order+1) {
+        for (unsigned p = 0; p <= Order; ++p) pol[p].resize( 1+p/2 );
+    }
 
-	/** @brief Compute the projection of a function onto the Zernike basis
-	 *
-	 *  This method projects a function onto the Zernike
-	 *  Polynomials Orthogonal Basis as described in equation (3)
-	 *  below (see [Maximo:2011] -- the discrete version).  This
-	 *  projection is the \f$(z_{p}^{q}(f))[x,y]\f$ associated
-	 *  with all possible orders \f$p\f$ and repetitions \f$q\f$
-	 *  as follows:
-	 *
-	 *  \f{equation}{
-	 z_{p}^{q}(f) = \frac{p+1}{\pi} \sum_{ (x,y) \in \mathbf{S} }
-	 (\bar{V_{p}}^{q})[x,y] f[x,y]
-	 *  \f}
-	 *
-	 *  The domain of the function \f$f(x,y)\f$ is considered to
-	 *  be a discrete grid (of a given size) in the range [-1, 1]
-	 *  and it is converted to polar coordinates \f$(\rho,
-	 *  \theta)\f$, evaluating only in the unit circle (where the
-	 *  Zernike basis is defined) centered at the origin.
-	 *
-	 *  @note This method uses the Discret Zernike Basis:
-	 *  \f$(V_{p}^{q})[x,y]\f$ (computed by compute_basis); which
-	 *  can be pre-computed and stored since the basis is valid to
-	 *  project any function in the same normalized domain.
-	 *
-	 *  @param[in] _fxy Discrete function to look up values (at [x, y] or _fxy[x][y])
-	 *  @param[in] _zpb Zernike Polynomials Basis for each [x, y]
-	 *  @param[in] _szx Function domain size on the x-direction
-	 *  @param[in] _szy Function domain size on the y-direction
-	 */
-	void project( const T **_fxy,
-		      const zpolbasis_type **_zpb,
-		      const unsigned int& _szx,
-		      const unsigned int& _szy ) {
-		T x, y, r; // (x, y) cartesian coordinates and radius r
-		for (unsigned p = 0; p <= Order; ++p) {
-			T p1pi = (p + 1) / M_PI; // frac outside summation
-			for (int qi = 0; qi <= p/2; ++qi) {
-				pol[p][qi] = value_type();
-				for (int gx = 0; gx < _szx; ++gx) {
-					x = ( (T)2 * gx + (T)1 ) / (T)_szx - (T)1;
-					for (int gy = 0; gy < _szy; ++gy) {
-						y = ( (T)2 * gy + (T)1 ) / (T)_szy - (T)1;
-						r = (T)sqrt( x*x + y*y );
-						if( r > (T)1 ) continue; // outside unit circle is zero
-						pol[p][qi] += std::conj( _zpb[gx][gy][p][qi] ) * _fxy[gx][gy];
-					} // gy
-				} // gx
-				pol[p][qi] *= p1pi;
-			} // qi
-		} // p
-	}
+    /** @brief Compute the projection of a function onto the Zernike basis
+     *
+     *  This method projects a function onto the Zernike
+     *  Polynomials Orthogonal Basis as described in equation (3)
+     *  below (see [Maximo:2011] -- the discrete version).  This
+     *  projection is the \f$(z_{p}^{q}(f))[x,y]\f$ associated
+     *  with all possible orders \f$p\f$ and repetitions \f$q\f$
+     *  as follows:
+     *
+     *  \f{equation}{
+     z_{p}^{q}(f) = \frac{p+1}{\pi} \sum_{ (x,y) \in \mathbf{S} }
+     (\bar{V_{p}}^{q})[x,y] f[x,y]
+     *  \f}
+     *
+     *  The domain of the function \f$f(x,y)\f$ is considered to
+     *  be a discrete grid (of a given size) in the range [-1, 1]
+     *  and it is converted to polar coordinates \f$(\rho,
+     *  \theta)\f$, evaluating only in the unit circle (where the
+     *  Zernike basis is defined) centered at the origin.
+     *
+     *  @note This method uses the Discret Zernike Basis:
+     *  \f$(V_{p}^{q})[x,y]\f$ (computed by compute_basis); which
+     *  can be pre-computed and stored since the basis is valid to
+     *  project any function in the same normalized domain.
+     *
+     *  @param[in] _fxy Discrete function to look up values (at [x, y] or _fxy[x][y])
+     *  @param[in] _zpb Zernike Polynomials Basis for each [x, y]
+     *  @param[in] _szx Function domain size on the x-direction
+     *  @param[in] _szy Function domain size on the y-direction
+     */
+    void project( const T **_fxy,
+                  const zpolbasis_type **_zpb,
+                  const unsigned int& _szx,
+                  const unsigned int& _szy ) {
+        T x, y, r; // (x, y) cartesian coordinates and radius r
+        for (unsigned p = 0; p <= Order; ++p) {
+            T p1pi = (p + 1) / M_PI; // frac outside summation
+            for (int qi = 0; qi <= p/2; ++qi) {
+                pol[p][qi] = value_type();
+                for (int gx = 0; gx < _szx; ++gx) {
+                    x = ( (T)2 * gx + (T)1 ) / (T)_szx - (T)1;
+                    for (int gy = 0; gy < _szy; ++gy) {
+                        y = ( (T)2 * gy + (T)1 ) / (T)_szy - (T)1;
+                        r = (T)sqrt( x*x + y*y );
+                        if( r > (T)1 ) continue; // outside unit circle is zero
+                        pol[p][qi] += std::conj( _zpb[gx][gy][p][qi] ) * _fxy[gx][gy];
+                    } // gy
+                } // gx
+                pol[p][qi] *= p1pi;
+            } // qi
+        } // p
+    }
 
-	/** @overload void project( const T **_fxy, zpolbasis_type **_zpb, const unsigned int& _szx, const unsigned int& _szy )
-	 *
-	 *  @param[in] _fxy Discrete function to look up values (at [x, y] or _fxy[x][y])
-	 *  @param[in] _zpb Zernike Polynomials Basis for each [x, y]
-	 *  @param[in] _szx Function domain size on the x-direction
-	 *  @param[in] _szy Function domain size on the y-direction
-	 */
-	void project( const T **_fxy,
-		      zpolbasis_type **_zpb,
-		      const unsigned int& _szx,
-		      const unsigned int& _szy ) {
-		project( _fxy, (const zpolbasis_type **)_zpb, _szx, _szy );
-	}
+    /** @overload void project( const T **_fxy, zpolbasis_type **_zpb, const unsigned int& _szx, const unsigned int& _szy )
+     *
+     *  @param[in] _fxy Discrete function to look up values (at [x, y] or _fxy[x][y])
+     *  @param[in] _zpb Zernike Polynomials Basis for each [x, y]
+     *  @param[in] _szx Function domain size on the x-direction
+     *  @param[in] _szy Function domain size on the y-direction
+     */
+    void project( const T **_fxy,
+                  zpolbasis_type **_zpb,
+                  const unsigned int& _szx,
+                  const unsigned int& _szy ) {
+        project( _fxy, (const zpolbasis_type **)_zpb, _szx, _szy );
+    }
 
-	/** @overload void project( T **_fxy, const zpolbasis_type **_zpb, const unsigned int& _szx, const unsigned int& _szy )
-	 *
-	 *  @param[in] _fxy Discrete function to look up values (at [x, y] or _fxy[x][y])
-	 *  @param[in] _zpb Zernike Polynomials Basis for each [x, y]
-	 *  @param[in] _szx Function domain size on the x-direction
-	 *  @param[in] _szy Function domain size on the y-direction
-	 */
-	void project( T **_fxy,
-		      const zpolbasis_type **_zpb,
-		      const unsigned int& _szx,
-		      const unsigned int& _szy ) {
-		project( (const T **)_fxy, (const zpolbasis_type **)_zpb, _szx, _szy );
-	}
+    /** @overload void project( T **_fxy, const zpolbasis_type **_zpb, const unsigned int& _szx, const unsigned int& _szy )
+     *
+     *  @param[in] _fxy Discrete function to look up values (at [x, y] or _fxy[x][y])
+     *  @param[in] _zpb Zernike Polynomials Basis for each [x, y]
+     *  @param[in] _szx Function domain size on the x-direction
+     *  @param[in] _szy Function domain size on the y-direction
+     */
+    void project( T **_fxy,
+                  const zpolbasis_type **_zpb,
+                  const unsigned int& _szx,
+                  const unsigned int& _szy ) {
+        project( (const T **)_fxy, (const zpolbasis_type **)_zpb, _szx, _szy );
+    }
 
-	/** @overload void project( T **_fxy, zpolbasis_type **_zpb, const unsigned int& _szx, const unsigned int& _szy )
-	 *
-	 *  @param[in] _fxy Discrete function to look up values (at [x, y] or _fxy[x][y])
-	 *  @param[in] _zpb Zernike Polynomials Basis for each [x, y]
-	 *  @param[in] _szx Function domain size on the x-direction
-	 *  @param[in] _szy Function domain size on the y-direction
-	 */
-	void project( T **_fxy,
-		      zpolbasis_type **_zpb,
-		      const unsigned int& _szx,
-		      const unsigned int& _szy ) {
-		project( (const T **)_fxy, (const zpolbasis_type **)_zpb, _szx, _szy );
-	}
+    /** @overload void project( T **_fxy, zpolbasis_type **_zpb, const unsigned int& _szx, const unsigned int& _szy )
+     *
+     *  @param[in] _fxy Discrete function to look up values (at [x, y] or _fxy[x][y])
+     *  @param[in] _zpb Zernike Polynomials Basis for each [x, y]
+     *  @param[in] _szx Function domain size on the x-direction
+     *  @param[in] _szy Function domain size on the y-direction
+     */
+    void project( T **_fxy,
+                  zpolbasis_type **_zpb,
+                  const unsigned int& _szx,
+                  const unsigned int& _szy ) {
+        project( (const T **)_fxy, (const zpolbasis_type **)_zpb, _szx, _szy );
+    }
 
-	/** @overload void project(const T **_fxy, const unsigned int& _szx, const unsigned int& _szy )
-	 *
-	 *  The overloaded version of the project method does not use
-	 *  the Discrete Zernike Basis and, therefore, has to compute
-	 *  the complex conjugate of V (\f$(\bar{V_{p}^{q}})[x,y]\f$)
-	 *  as in compute_basis.
-	 *
-	 *  @param[in] _fxy Discrete function to look up values (at [x, y] or _fxy[x][y])
-	 *  @param[in] _szx Function domain size on the x-direction
-	 *  @param[in] _szy Function domain size on the y-direction
-	 */
-	void project( const T **_fxy,
-		      const unsigned int& _szx,
-		      const unsigned int& _szy ) {
-		T x, y, r, t; // (x, y) cartesian and (r, t) polar coordinates
-		for (unsigned p = 0; p <= Order; ++p) {
-			T p1pi = (p + 1) / M_PI; // frac outside summation
-			int qi = 0; // q index: q[0, 2, 4] -> qi[0, 1, 2]
-			for (int q = p % 2; q <= p; q += 2, qi++) {
-				pol[p][qi] = value_type();
-				for (int gx = 0; gx < _szx; ++gx) {
-					x = ( (T)2 * gx + (T)1 ) / (T)_szx - (T)1;
-					for (int gy = 0; gy < _szy; ++gy) {
-						y = ( (T)2 * gy + (T)1 ) / (T)_szy - (T)1;
-						r = (T)sqrt( x*x + y*y );
-						if( r > (T)1 ) continue; // outside unit circle is zero
-						t = (T)atan2( y, x );
-						pol[p][qi] += std::conj( compute_V(p, q, r, t) ) * _fxy[gx][gy];
-					} // gy
-				} // gx
-				pol[p][qi] *= p1pi;
-			} // q
-		} // p
-	}
+    /** @overload void project(const T **_fxy, const unsigned int& _szx, const unsigned int& _szy )
+     *
+     *  The overloaded version of the project method does not use
+     *  the Discrete Zernike Basis and, therefore, has to compute
+     *  the complex conjugate of V (\f$(\bar{V_{p}^{q}})[x,y]\f$)
+     *  as in compute_basis.
+     *
+     *  @param[in] _fxy Discrete function to look up values (at [x, y] or _fxy[x][y])
+     *  @param[in] _szx Function domain size on the x-direction
+     *  @param[in] _szy Function domain size on the y-direction
+     */
+    void project( const T **_fxy,
+                  const unsigned int& _szx,
+                  const unsigned int& _szy ) {
+        T x, y, r, t; // (x, y) cartesian and (r, t) polar coordinates
+        for (unsigned p = 0; p <= Order; ++p) {
+            T p1pi = (p + 1) / M_PI; // frac outside summation
+            int qi = 0; // q index: q[0, 2, 4] -> qi[0, 1, 2]
+            for (int q = p % 2; q <= p; q += 2, qi++) {
+                pol[p][qi] = value_type();
+                for (int gx = 0; gx < _szx; ++gx) {
+                    x = ( (T)2 * gx + (T)1 ) / (T)_szx - (T)1;
+                    for (int gy = 0; gy < _szy; ++gy) {
+                        y = ( (T)2 * gy + (T)1 ) / (T)_szy - (T)1;
+                        r = (T)sqrt( x*x + y*y );
+                        if( r > (T)1 ) continue; // outside unit circle is zero
+                        t = (T)atan2( y, x );
+                        pol[p][qi] += std::conj( compute_V(p, q, r, t) ) * _fxy[gx][gy];
+                    } // gy
+                } // gx
+                pol[p][qi] *= p1pi;
+            } // q
+        } // p
+    }
 
-	/** @overload void project( T **_fxy, const unsigned int& _szx, const unsigned int& _szy )
-	 *
-	 *  @param[in] _fxy Discrete function to look up values (at [x, y] or _fxy[x][y])
-	 *  @param[in] _szx Function domain size on the x-direction
-	 *  @param[in] _szy Function domain size on the y-direction
-	 */
-	void project( T **_fxy,
-		      const unsigned int& _szx,
-		      const unsigned int& _szy ) {
-		project( (const T **)_fxy, _szx, _szy );
-	}
+    /** @overload void project( T **_fxy, const unsigned int& _szx, const unsigned int& _szy )
+     *
+     *  @param[in] _fxy Discrete function to look up values (at [x, y] or _fxy[x][y])
+     *  @param[in] _szx Function domain size on the x-direction
+     *  @param[in] _szy Function domain size on the y-direction
+     */
+    void project( T **_fxy,
+                  const unsigned int& _szx,
+                  const unsigned int& _szy ) {
+        project( (const T **)_fxy, _szx, _szy );
+    }
 
-	/** @brief Compute the reconstruction of a function using the Zernike basis
-	 *
-	 *  This method reconstructs a function using the Zernike
-	 *  Polynomials Orthogonal Basis, considering this polynomial
-	 *  object as the representation of the function via Zernike
-	 *  coefficients and a given Zernike Polynomial Basis as
-	 *  \f$(V_{p}^{q})[x,y]\f$.
-	 *
-	 *  @param[out] _fxy Discrete function to reconstruct (at [x, y] or _fxy[x][y])
-	 *  @param[in] _zpb Zernike Polynomials Basis for each [x, y]
-	 *  @param[in] _szx Function domain size on the x-direction
-	 *  @param[in] _szy Function domain size on the y-direction
-	 */
-	void reconstruct( T **_fxy,
-			  const zpolbasis_type **_zpb,
-			  const unsigned int& _szx,
-			  const unsigned int& _szy ) const {
-		value_type rv; // reconstructed value
-		for (int gx = 0; gx < _szx; ++gx) {
-			for (int gy = 0; gy < _szy; ++gy) {
-				rv = value_type();
-				for (unsigned p = 0; p <= Order; ++p) {
-					for (int qi = 0; qi <= p/2; ++qi) {
-						rv += pol[p][qi] * _zpb[gx][gy][p][qi]; // using +q
-						if( p % 2 != 0 or qi != 0 ) // for p even and q zero z does not repeat itself
-							rv += std::conj( pol[p][qi] ) * std::conj( _zpb[gx][gy][p][qi] ); // using -q
-					} // qi
-				} // p
-				_fxy[gx][gy] = rv.real();
-			} // gy
-		} // gx
-	}
+    /** @brief Compute the reconstruction of a function using the Zernike basis
+     *
+     *  This method reconstructs a function using the Zernike
+     *  Polynomials Orthogonal Basis, considering this polynomial
+     *  object as the representation of the function via Zernike
+     *  coefficients and a given Zernike Polynomial Basis as
+     *  \f$(V_{p}^{q})[x,y]\f$.
+     *
+     *  @param[out] _fxy Discrete function to reconstruct (at [x, y] or _fxy[x][y])
+     *  @param[in] _zpb Zernike Polynomials Basis for each [x, y]
+     *  @param[in] _szx Function domain size on the x-direction
+     *  @param[in] _szy Function domain size on the y-direction
+     */
+    void reconstruct( T **_fxy,
+                      const zpolbasis_type **_zpb,
+                      const unsigned int& _szx,
+                      const unsigned int& _szy ) const {
+        value_type rv; // reconstructed value
+        for (int gx = 0; gx < _szx; ++gx) {
+            for (int gy = 0; gy < _szy; ++gy) {
+                rv = value_type();
+                for (unsigned p = 0; p <= Order; ++p) {
+                    for (int qi = 0; qi <= p/2; ++qi) {
+                        rv += pol[p][qi] * _zpb[gx][gy][p][qi]; // using +q
+                        if( p % 2 != 0 or qi != 0 ) // for p even and q zero z does not repeat itself
+                            rv += std::conj( pol[p][qi] ) * std::conj( _zpb[gx][gy][p][qi] ); // using -q
+                    } // qi
+                } // p
+                _fxy[gx][gy] = rv.real();
+            } // gy
+        } // gx
+    }
 
-	/** @overload void reconstruct( T **_fxy, zpolbasis_type **_zpb, const unsigned int& _szx, const unsigned int& _szy ) const
-	 *
-	 *  @param[out] _fxy Discrete function to reconstruct (at [x, y] or _fxy[x][y])
-	 *  @param[in] _zpb Zernike Polynomials Basis for each [x, y]
-	 *  @param[in] _szx Function domain size on the x-direction
-	 *  @param[in] _szy Function domain size on the y-direction
-	 */
-	void reconstruct( T **_fxy,
-			  zpolbasis_type **_zpb,
-			  const unsigned int& _szx,
-			  const unsigned int& _szy ) const {
-		reconstruct( _fxy, (const zpolbasis_type **)_zpb, _szx, _szy );
-	}
+    /** @overload void reconstruct( T **_fxy, zpolbasis_type **_zpb, const unsigned int& _szx, const unsigned int& _szy ) const
+     *
+     *  @param[out] _fxy Discrete function to reconstruct (at [x, y] or _fxy[x][y])
+     *  @param[in] _zpb Zernike Polynomials Basis for each [x, y]
+     *  @param[in] _szx Function domain size on the x-direction
+     *  @param[in] _szy Function domain size on the y-direction
+     */
+    void reconstruct( T **_fxy,
+                      zpolbasis_type **_zpb,
+                      const unsigned int& _szx,
+                      const unsigned int& _szy ) const {
+        reconstruct( _fxy, (const zpolbasis_type **)_zpb, _szx, _szy );
+    }
 
-	/** @overload void reconstruct(T **_fxy, const unsigned int& _szx, const unsigned int& _szy ) const
-	 *
-	 *  The overloaded version of the reconstruct method does not
-	 *  use the Discrete Zernike Basis and, therefore, has to
-	 *  compute V (\f$(V_{p}^{q})[x,y]\f$) as in compute_basis.
-	 *
-	 *  @param[out] _fxy Discrete function to reconstruct (at [x, y] or _fxy[x][y])
-	 *  @param[in] _szx Function domain size on the x-direction
-	 *  @param[in] _szy Function domain size on the y-direction
-	 */
-	void reconstruct( T **_fxy,
-			  const unsigned int& _szx,
-			  const unsigned int& _szy ) const {
-		T x, y, r, t; // (x, y) cartesian and (r, t) polar coordinates
-		value_type rv, zpV; // reconstructed value and Zernike Polynomial V
-		for (int gx = 0; gx < _szx; ++gx) {
-			x = ( (T)2 * gx + (T)1 ) / (T)_szx - (T)1;
-			for (int gy = 0; gy < _szy; ++gy) {
-				y = ( (T)2 * gy + (T)1 ) / (T)_szy - (T)1;
-				r = (T)sqrt( x*x + y*y );
-				rv = value_type();
-				if( r <= (T)1 ) { // reconstruct inside unit circle only
-					for (unsigned p = 0; p <= Order; ++p) {
-						int qi = 0; // q index: q[0, 2, 4] -> qi[0, 1, 2]
-						for (int q = p % 2; q <= p; q += 2, qi++) {
-							t = (T)atan2( y, x );
-							zpV = compute_V(p, q, r, t);
-							rv += pol[p][qi] * zpV; // using +q
-							if( p % 2 != 0 or qi != 0 ) // for p even and q zero z does not repeat itself
-								rv += std::conj( pol[p][qi] ) * std::conj( zpV ); // using -q
-						} // q
-					} // p
-				} // if
-				_fxy[gx][gy] = rv.real();
-			} // gy
-		} // gx
-	}
+    /** @overload void reconstruct(T **_fxy, const unsigned int& _szx, const unsigned int& _szy ) const
+     *
+     *  The overloaded version of the reconstruct method does not
+     *  use the Discrete Zernike Basis and, therefore, has to
+     *  compute V (\f$(V_{p}^{q})[x,y]\f$) as in compute_basis.
+     *
+     *  @param[out] _fxy Discrete function to reconstruct (at [x, y] or _fxy[x][y])
+     *  @param[in] _szx Function domain size on the x-direction
+     *  @param[in] _szy Function domain size on the y-direction
+     */
+    void reconstruct( T **_fxy,
+                      const unsigned int& _szx,
+                      const unsigned int& _szy ) const {
+        T x, y, r, t; // (x, y) cartesian and (r, t) polar coordinates
+        value_type rv, zpV; // reconstructed value and Zernike Polynomial V
+        for (int gx = 0; gx < _szx; ++gx) {
+            x = ( (T)2 * gx + (T)1 ) / (T)_szx - (T)1;
+            for (int gy = 0; gy < _szy; ++gy) {
+                y = ( (T)2 * gy + (T)1 ) / (T)_szy - (T)1;
+                r = (T)sqrt( x*x + y*y );
+                rv = value_type();
+                if( r <= (T)1 ) { // reconstruct inside unit circle only
+                    for (unsigned p = 0; p <= Order; ++p) {
+                        int qi = 0; // q index: q[0, 2, 4] -> qi[0, 1, 2]
+                        for (int q = p % 2; q <= p; q += 2, qi++) {
+                            t = (T)atan2( y, x );
+                            zpV = compute_V(p, q, r, t);
+                            rv += pol[p][qi] * zpV; // using +q
+                            if( p % 2 != 0 or qi != 0 ) // for p even and q zero z does not repeat itself
+                                rv += std::conj( pol[p][qi] ) * std::conj( zpV ); // using -q
+                        } // q
+                    } // p
+                } // if
+                _fxy[gx][gy] = rv.real();
+            } // gy
+        } // gx
+    }
 
-	/** @brief Compare two Zernike polynomials representations
-	 *
-	 *  The representation of a function is given by the Zernike
-	 *  coefficients computed by the projection into the basis.
-	 *  This method compares this polynomial coefficients with a
-	 *  given another polynomial coefficients computing the
-	 *  Euclidean distance between the two in Zernike space.
-	 *
-	 *  @param[in] _zp Zernike polynomial to compare to
-	 *  @return Euclidean distance between Zernike coefficients
-	 */
-	T compare( const zpolbasis_type& _zp ) const {
-		T dist = (T)0; // distance
-		T modz[2]; // modulus of z
-		for (unsigned p = 0; p <= Order; ++p) {
-			for (unsigned qi = 0; qi <= p/2; ++qi) {
-				modz[0] = std::abs( pol[p][qi] );
-				modz[1] = std::abs( _zp[p][qi] );
-				dist += (modz[0] - modz[1] ) * (modz[0] - modz[1] );
-			} // qi
-		} // p
-		return sqrt( dist );
-	}
+    /** @brief Compare two Zernike polynomials representations
+     *
+     *  The representation of a function is given by the Zernike
+     *  coefficients computed by the projection into the basis.
+     *  This method compares this polynomial coefficients with a
+     *  given another polynomial coefficients computing the
+     *  Euclidean distance between the two in Zernike space.
+     *
+     *  @param[in] _zp Zernike polynomial to compare to
+     *  @return Euclidean distance between Zernike coefficients
+     */
+    T compare( const zpolbasis_type& _zp ) const {
+        T dist = (T)0; // distance
+        T modz[2]; // modulus of z
+        for (unsigned p = 0; p <= Order; ++p) {
+            for (unsigned qi = 0; qi <= p/2; ++qi) {
+                modz[0] = std::abs( pol[p][qi] );
+                modz[1] = std::abs( _zp[p][qi] );
+                dist += (modz[0] - modz[1] ) * (modz[0] - modz[1] );
+            } // qi
+        } // p
+        return sqrt( dist );
+    }
 
-	/** @brief Read/write operator of each radial polynomial
-	 *
-	 *  @param[in] _p Radial order
-	 *  @return Radial polynomial of order _p
-	 */
-	radial_polynomial& operator[] ( const unsigned& _p ) { return this->pol[_p]; }
+    /** @brief Read/write operator of each radial polynomial
+     *
+     *  @param[in] _p Radial order
+     *  @return Radial polynomial of order _p
+     */
+    radial_polynomial& operator[] ( const unsigned& _p ) { return this->pol[_p]; }
 
-	/** @brief Read operator of each radial polynomial
-	 *
-	 *  @param[in] _p Radial order
-	 *  @return Constant radial polynomial of order _p
-	 */
-	const radial_polynomial& operator[] ( const unsigned& _p ) const { return this->pol[_p]; }
+    /** @brief Read operator of each radial polynomial
+     *
+     *  @param[in] _p Radial order
+     *  @return Constant radial polynomial of order _p
+     */
+    const radial_polynomial& operator[] ( const unsigned& _p ) const { return this->pol[_p]; }
 
-	/** @brief Output stream operator
-	 *
-	 *  @param[in,out] _out Output stream
-	 *  @param[in] _z Zernike Polynomials Basis to output
-	 *  @return Output stream
-	 */
-	friend std::ostream& operator << ( std::ostream& _out,
-					   const zpolbasis_type& _z ) {
-		for (unsigned p = 0; p <= Order; ++p) {
-			_out << _z[p][0];
-			for (unsigned qi = 1; qi <= p/2; ++qi)
-				_out << " " << _z[p][qi];
-			if( p < Order ) _out << "\n";
-		}
-		return _out;
-	}
+    /** @brief Output stream operator
+     *
+     *  @param[in,out] _out Output stream
+     *  @param[in] _z Zernike Polynomials Basis to output
+     *  @return Output stream
+     */
+    friend std::ostream& operator << ( std::ostream& _out,
+                       const zpolbasis_type& _z ) {
+        for (unsigned p = 0; p <= Order; ++p) {
+            _out << _z[p][0];
+            for (unsigned qi = 1; qi <= p/2; ++qi)
+                _out << " " << _z[p][qi];
+            if( p < Order ) _out << "\n";
+        }
+        return _out;
+    }
 
-	/** @brief Input stream operator
-	 *
-	 *  @param[in,out] _in Input stream
-	 *  @param[out] _z Zernike Polynomials Basis to input
-	 *  @return Input stream
-	 */
-	friend std::istream& operator >> ( std::istream& _in,
-					   zpolbasis_type& _z ) {
-		for (unsigned p = 0; p <= Order; ++p)
-			for (unsigned qi = 0; qi <= p/2; ++qi)
-				_in >> _z[p][qi];
-		return _in;
-	}
+    /** @brief Input stream operator
+     *
+     *  @param[in,out] _in Input stream
+     *  @param[out] _z Zernike Polynomials Basis to input
+     *  @return Input stream
+     */
+    friend std::istream& operator >> ( std::istream& _in,
+                       zpolbasis_type& _z ) {
+        for (unsigned p = 0; p <= Order; ++p)
+            for (unsigned qi = 0; qi <= p/2; ++qi)
+                _in >> _z[p][qi];
+        return _in;
+    }
 
 private:
 
-	std::vector< radial_polynomial > pol; ///< Vector of radial polynomials forming the basis
+    std::vector< radial_polynomial > pol; ///< Vector of radial polynomials forming the basis
 
 };
 /** @example example_zproj.cc
@@ -522,39 +522,39 @@ private:
  */
 template< unsigned Order, class T >
 void compute_basis( ZernikePolynomialsBasisT< Order, T > **_zpb,
-		    const unsigned int& _szx,
-		    const unsigned int& _szy ) {
+                    const unsigned int& _szx,
+                    const unsigned int& _szy ) {
 
-	T x, y, r, t; // (x, y) cartesian and (r, t) polar coordinates
+    T x, y, r, t; // (x, y) cartesian and (r, t) polar coordinates
 
-	for (unsigned gx = 0; gx < _szx; ++gx) {
+    for (unsigned gx = 0; gx < _szx; ++gx) {
 
-		x = ( (T)2 * gx + (T)1 ) / (T)_szx - (T)1;
+        x = ( (T)2 * gx + (T)1 ) / (T)_szx - (T)1;
 
-		for (unsigned gy = 0; gy < _szy; ++gy) {
+        for (unsigned gy = 0; gy < _szy; ++gy) {
 
-			y = ( (T)2 * gy + (T)1 ) / (T)_szy - (T)1;
+            y = ( (T)2 * gy + (T)1 ) / (T)_szy - (T)1;
 
-			r = (T)sqrt( x*x + y*y );
-			if( r > (T)1 ) continue; // outside unit circle is zero
+            r = (T)sqrt( x*x + y*y );
+            if( r > (T)1 ) continue; // outside unit circle is zero
 
-			t = (T)atan2( y, x );
+            t = (T)atan2( y, x );
 
-			for (int p = 0; p <= Order; ++p) {
+            for (int p = 0; p <= Order; ++p) {
 
-				int qi = 0; // q index: q[0, 2, 4] -> qi[0, 1, 2]
+                int qi = 0; // q index: q[0, 2, 4] -> qi[0, 1, 2]
 
-				for (int q = p % 2; q <= p; q += 2, qi++) {
+                for (int q = p % 2; q <= p; q += 2, qi++) {
 
-					_zpb[gx][gy][p][qi] = compute_V(p, q, r, t);
+                    _zpb[gx][gy][p][qi] = compute_V(p, q, r, t);
 
-				} // q
+                } // q
 
-			} // p
+            } // p
 
-		} // gy
+        } // gy
 
-	} // gx
+    } // gx
 
 }
 /** @example example_zpol.cc

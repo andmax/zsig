@@ -17,11 +17,11 @@ typedef unsigned char ppmimg [DOMAIN_GRID_X * DOMAIN_GRID_Y * 3];
 
 // Convert hue, saturation, value to red, green, blue colors
 void hsv_to_rgb( const ZERNIKE_VALUE_TYPE& h,
-		 const ZERNIKE_VALUE_TYPE& s,
-		 const ZERNIKE_VALUE_TYPE& v,
-		 ZERNIKE_VALUE_TYPE& r,
-		 ZERNIKE_VALUE_TYPE& g,
-		 ZERNIKE_VALUE_TYPE& b ) {
+                 const ZERNIKE_VALUE_TYPE& s,
+                 const ZERNIKE_VALUE_TYPE& v,
+                 ZERNIKE_VALUE_TYPE& r,
+                 ZERNIKE_VALUE_TYPE& g,
+                 ZERNIKE_VALUE_TYPE& b ) {
 
 	if (s == 0) { r = v; g = v; b = v; }
 	else {
@@ -45,9 +45,9 @@ void hsv_to_rgb( const ZERNIKE_VALUE_TYPE& h,
 
 // Convert scalar value to RGB using a color palette
 void scalar_to_rgb( const ZERNIKE_VALUE_TYPE& scalar,
-		    ZERNIKE_VALUE_TYPE& red,
-		    ZERNIKE_VALUE_TYPE& green,
-		    ZERNIKE_VALUE_TYPE& blue ) {
+                    ZERNIKE_VALUE_TYPE& red,
+                    ZERNIKE_VALUE_TYPE& green,
+                    ZERNIKE_VALUE_TYPE& blue ) {
 
 	static const ZERNIKE_VALUE_TYPE value = 90/100.0;
 	static const ZERNIKE_VALUE_TYPE saturation = 60/100.0;

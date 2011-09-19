@@ -3,6 +3,7 @@
  *  @brief Zernike-based Vertex Signatures definition
  *  @author Andre Maximo
  *  @date November, 2009
+ *  @copyright GNU General Public License version 3
  */
 
 #ifndef ZSIG_HH
@@ -141,20 +142,20 @@ namespace zsig {
  */
 template< unsigned R, unsigned C, class T >
 void compute_sig( std::vector< SignatureT< R, C, T > >& _sig,
-		  const SignatureMeshT< T >& _m ) {
+                  const SignatureMeshT< T >& _m ) {
 
-	_sig.clear();
+    _sig.clear();
 
-	// vector resize method is not working with signature class,
-	// something is wrong with operator new I guess:
-	// _sig.resize( _m.size_of_vertices() );
+    // vector resize method is not working with signature class,
+    // something is wrong with operator new I guess:
+    // _sig.resize( _m.size_of_vertices() );
 
-	_sig.reserve( _m.size_of_vertices() );
-	for (unsigned vid = 0; vid < _m.size_of_vertices(); ++vid)
-		_sig.push_back( SignatureT< R, C, T >() );
+    _sig.reserve( _m.size_of_vertices() );
+    for (unsigned vid = 0; vid < _m.size_of_vertices(); ++vid)
+        _sig.push_back( SignatureT< R, C, T >() );
 
-	for (unsigned vid = 0; vid < _m.size_of_vertices(); ++vid)
-		compute_signature( _sig[vid], _m, vid );
+    for (unsigned vid = 0; vid < _m.size_of_vertices(); ++vid)
+        compute_signature( _sig[vid], _m, vid );
 
 }
 
@@ -180,22 +181,22 @@ void compute_sig( std::vector< SignatureT< R, C, T > >& _sig,
  */
 template< unsigned Order, class T, unsigned R, unsigned C >
 void compute_zsig( std::vector< ZernikePolynomialsBasisT< Order, T > >& _zsig,
-		   const SignatureMeshT< T >& _m,
-		   const std::vector< SignatureT< R, C, T > >& _sig ) {
+                   const SignatureMeshT< T >& _m,
+                   const std::vector< SignatureT< R, C, T > >& _sig ) {
 
-	typedef ZernikePolynomialsBasisT< Order, T > zpolbasis_type;
-	typedef SignatureT< R, C, zpolbasis_type > zsig_type;
-	typedef SignatureT< R, C, T > signature_type;
+    typedef ZernikePolynomialsBasisT< Order, T > zpolbasis_type;
+    typedef SignatureT< R, C, zpolbasis_type > zsig_type;
+    typedef SignatureT< R, C, T > signature_type;
 
-	_zsig.clear();
-	_zsig.resize( _m.size_of_vertices() );
+    _zsig.clear();
+    _zsig.resize( _m.size_of_vertices() );
 
-	zsig_type ZernikeBasis;
+    zsig_type ZernikeBasis;
 
-	compute_basis( &ZernikeBasis, R, C );
+    compute_basis( &ZernikeBasis, R, C );
 
-	for (unsigned vid = 0; vid < _m.size_of_vertices(); ++vid)
-		_zsig[vid].project( &_sig[vid], &ZernikeBasis, R, C );
+    for (unsigned vid = 0; vid < _m.size_of_vertices(); ++vid)
+        _zsig[vid].project( &_sig[vid], &ZernikeBasis, R, C );
 
 }
 
@@ -215,13 +216,13 @@ void compute_zsig( std::vector< ZernikePolynomialsBasisT< Order, T > >& _zsig,
  */
 template< unsigned Order, class T, unsigned R, unsigned C >
 void compute_zsig( std::vector< ZernikePolynomialsBasisT< Order, T > >& _zsig,
-		   const SignatureMeshT< T >& _m ) {
+                   const SignatureMeshT< T >& _m ) {
 
-	std::vector< SignatureT< R, C, T > > _sig;
+    std::vector< SignatureT< R, C, T > > _sig;
 
-	compute_sig< R, C, T >( _sig, _m );
+    compute_sig< R, C, T >( _sig, _m );
 
-	compute_zsig< Order, T, R, C >( _zsig, _m, _sig );
+    compute_zsig< Order, T, R, C >( _zsig, _m, _sig );
 
 }
 
@@ -255,54 +256,54 @@ void compute_zsig( std::vector< ZernikePolynomialsBasisT< Order, T > >& _zsig,
  */
 template< unsigned Order, class T, unsigned R, unsigned C >
 void compute_gwzsig( std::vector< ZernikePolynomialsBasisT< Order, T > >& _gwzsig,
-		     const SignatureMeshT< T >& _m,
-		     const std::vector< ZernikePolynomialsBasisT< Order, T > >& _zsig ) {
+                     const SignatureMeshT< T >& _m,
+                     const std::vector< ZernikePolynomialsBasisT< Order, T > >& _zsig ) {
 
-	typedef ZernikePolynomialsBasisT< Order, T > zpolbasis_type;
-	typedef SignatureT< R, C, zpolbasis_type > zsig_type;
-	typedef SignatureT< R, C, T > signature_type;
+    typedef ZernikePolynomialsBasisT< Order, T > zpolbasis_type;
+    typedef SignatureT< R, C, zpolbasis_type > zsig_type;
+    typedef SignatureT< R, C, T > signature_type;
 
-	typedef typename SignatureMeshT< T >::vec3 vec3;
+    typedef typename SignatureMeshT< T >::vec3 vec3;
 
-	// Gaussian-weighted Zernike coefficients to be returned
-	_gwzsig.clear();
-	_gwzsig.resize( _m.size_of_vertices() );
+    // Gaussian-weighted Zernike coefficients to be returned
+    _gwzsig.clear();
+    _gwzsig.resize( _m.size_of_vertices() );
 
-	std::set< unsigned > nv; // neighborhood of vertices to be consider around vertex
+    std::set< unsigned > nv; // neighborhood of vertices to be consider around vertex
 
-	T gsigma = _m.maximum_search_distance() / (T)2; // Gaussian sigma
+    T gsigma = _m.maximum_search_distance() / (T)2; // Gaussian sigma
 
-	T gw, coff = (T)2 * gsigma * gsigma; // Gaussian weight and cut-off
+    T gw, coff = (T)2 * gsigma * gsigma; // Gaussian weight and cut-off
 
-	vec3 v, ov; // current and other vertices
+    vec3 v, ov; // current and other vertices
 
-	for (unsigned vid = 0; vid < _m.size_of_vertices(); ++vid) {
+    for (unsigned vid = 0; vid < _m.size_of_vertices(); ++vid) {
 
-		_m.compute_neighborhood( vid, nv, true );
+        _m.compute_neighborhood( vid, nv, true );
 
-		T den = (T)0; // Gaussian normalization factor (denominator)
+        T den = (T)0; // Gaussian normalization factor (denominator)
 
-		v = _m.vertices()[vid];
+        v = _m.vertices()[vid];
 
-		for (std::set< unsigned >::iterator sit = nv.begin(); sit != nv.end(); ++sit) {
+        for (std::set< unsigned >::iterator sit = nv.begin(); sit != nv.end(); ++sit) {
 
-			ov = _m.vertices()[*sit];
+            ov = _m.vertices()[*sit];
 
-			gw = std::exp( - ( ov - v ).sqrl() / coff );
+            gw = std::exp( - ( ov - v ).sqrl() / coff );
 
-			for (unsigned p = 0; p <= Order; ++p)
-				for (unsigned qi = 0; qi <= p/2; ++qi)
-					_gwzsig[vid][p][qi] += _zsig[*sit][p][qi] * gw;
+            for (unsigned p = 0; p <= Order; ++p)
+                for (unsigned qi = 0; qi <= p/2; ++qi)
+                    _gwzsig[vid][p][qi] += _zsig[*sit][p][qi] * gw;
 
-			den += gw;
+            den += gw;
 
-		} // sit
+        } // sit
 
-		for (unsigned p = 0; p <= Order; ++p)
-			for (unsigned qi = 0; qi <= p/2; ++qi)
-				_gwzsig[vid][p][qi] /= den;
+        for (unsigned p = 0; p <= Order; ++p)
+            for (unsigned qi = 0; qi <= p/2; ++qi)
+                _gwzsig[vid][p][qi] /= den;
 
-	} // vid
+    } // vid
 
 }
 /** @example app_compute_signature.cc
@@ -329,13 +330,13 @@ void compute_gwzsig( std::vector< ZernikePolynomialsBasisT< Order, T > >& _gwzsi
  */
 template< unsigned Order, class T, unsigned R, unsigned C >
 void compute_gwzsig( std::vector< ZernikePolynomialsBasisT< Order, T > >& _gwzsig,
-		     const SignatureMeshT< T >& _m ) {
+                     const SignatureMeshT< T >& _m ) {
 
-	std::vector< ZernikePolynomialsBasisT< Order, T > > _zsig;
+    std::vector< ZernikePolynomialsBasisT< Order, T > > _zsig;
 
-	compute_zsig< Order, T, R, C >( _zsig, _m );
+    compute_zsig< Order, T, R, C >( _zsig, _m );
 
-	compute_gwzsig< Order, T, R, C >( _gwzsig, _m, _zsig );
+    compute_gwzsig< Order, T, R, C >( _gwzsig, _m, _zsig );
 
 }
 /** @example app_paint_signature.cc
