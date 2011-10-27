@@ -48,7 +48,7 @@ int main( int argc, char *argv[] ) {
     std::cout << "[zsig] Mesh's bounding box is [" << bb[0] << " : " << bb[1] << "]\n";
     std::cout << "[zsig] Mesh's diagonal distance is " << mesh.diagonal_distance() << "\n";
 
-    std::cout << "[zsig] Computing Gaussian-weighted Zernike-based signatures\n";
+    std::cout << "[zsig] Computing Gaussian-weighted Zernike-based signatures (this may take a while...)\n";
 
     std::vector< zpolbasis_type > gwzsig;
 

@@ -320,8 +320,8 @@ public:
     void build_grid( T& _msd ) {
         if( gfa ) delete [] gfa;
         T msl = diag[0]; // maximum side length
-        msl = std::max( msl, diag[1] );
-        msl = std::max( msl, diag[2] );
+        msl = std::min( msl, diag[1] );
+        msl = std::min( msl, diag[2] ); 
         gd = ceil( msl / _msd );
         gfa = new std::vector< unsigned >[ gd * gd * gd ];
         uvec3 gp; // grid position
