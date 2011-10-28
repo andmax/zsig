@@ -176,6 +176,7 @@ public:
     typedef vec< 3, unsigned > uvec3; ///< Unsigned integer vec3 type
     typedef SignatureMeshT< T > mesh_type; ///< This class type
     typedef std::vector< unsigned > index_list; ///< Index list type
+    typedef std::set< unsigned > index_set; ///< Index set type
     typedef vec3 bbox_type [2]; ///< Bounding box type (min, max)
     typedef vec3 sigplane_type [4]; ///< Signature plane type with Origin Position and LCF (P, X, Y, Z)
 
@@ -323,12 +324,12 @@ public:
         msl = std::min( msl, diag[1] );
         msl = std::min( msl, diag[2] ); 
         gd = ceil( msl / _msd );
-        gfa = new std::vector< unsigned >[ gd * gd * gd ];
+        gfa = new index_set[ gd * gd * gd ];
         uvec3 gp; // grid position
         for (unsigned i = 0; i < nf; ++i) {
             for (unsigned j = 0; j < 3; ++j) {
                 convert_to_grid( va[ fa[i][j] ], gp );
-                gfa[ gp[0]*gd*gd + gp[1]*gd + gp[2] ].push_back( i );
+                gfa[ gp[2]*gd*gd + gp[1]*gd + gp[0] ].insert( i );
             } // j
         } // i
         msd = _msd;
@@ -406,11 +407,11 @@ public:
         uvec3 gp; // grid position of vertex
         convert_to_grid( v, gp );
         _nb.clear();
-        for (unsigned ci = std::max((int)gp[0]-1, 0); ci <= std::min((int)gp[0]+1, (int)gd-1); ++ci) {
+        for (unsigned ci = std::max((int)gp[2]-1, 0); ci <= std::min((int)gp[2]+1, (int)gd-1); ++ci) {
             for (unsigned cj = std::max((int)gp[1]-1, 0); cj <= std::min((int)gp[1]+1, (int)gd-1); ++cj) {
-                for (unsigned ck = std::max((int)gp[2]-1, 0); ck <= std::min((int)gp[2]+1, (int)gd-1); ++ck) {
-                    for (unsigned i = 0; i < gfa[ci*gd*gd+cj*gd+ck].size(); ++i) {
-                        unsigned fi = gfa[ci*gd*gd+cj*gd+ck][i];
+                for (unsigned ck = std::max((int)gp[0]-1, 0); ck <= std::min((int)gp[0]+1, (int)gd-1); ++ck) {
+                    for (index_set::iterator sit = gfa[ci*gd*gd+cj*gd+ck].begin(); sit != gfa[ci*gd*gd+cj*gd+ck].end(); ++sit) {
+                        unsigned fi = *sit;
                         for (unsigned vi = 0; vi < 3; ++vi) {
                             vec3 ov = va[ fa[fi][vi] ];
                             if( (ov - v).length() <= msd ) {
@@ -506,11 +507,11 @@ public:
      *  @param[in] _gfa Grid faces array to set
      *  @param[in] _msd Maximum search distance to set
      */
-    void set_grid( const unsigned& _gd, const index_list *_gfa, const T& _msd ) {
+    void set_grid( const unsigned& _gd, const index_set *_gfa, const T& _msd ) {
         if( !_gfa ) return;
         gd = _gd;
         if( gfa ) delete [] gfa;
-        gfa = new index_list[ gd * gd * gd ];
+        gfa = new index_set[ gd * gd * gd ];
         for (unsigned i = 0; i < gd; ++i)
             for (unsigned j = 0; j < gd; ++j)
                 for (unsigned k = 0; k < gd; ++k)
@@ -590,12 +591,12 @@ public:
     /** @brief Get the grid of this mesh
      *  @return Grid of this mesh
      */
-    index_list *grid( void ) { return gfa; }
+    index_set *grid( void ) { return gfa; }
 
     /** @overload const index_list *grid( void ) const
      *  @return Constant grid of this mesh
      */
-    const index_list *grid( void ) const { return gfa; }
+    const index_set *grid( void ) const { return gfa; }
 
     /** @brief Get the maximum search distance of this mesh
      *  @return Maximum search distance of this mesh
@@ -672,7 +673,7 @@ private:
     unsigned nv, nf, gd; ///< Number of vertices, faces and grid dimension
     vec3 *va; ///< Vertices array
     uvec3 *fa; ///< Faces array
-    index_list *gfa; ///< Grid of faces array
+    index_set *gfa; ///< Grid of faces array
     T msd; ///< Maximum distance that can be used in neighborhood search
     vec3 *fna; ///< Face normals array
     std::vector< index_list > nfv; ///< Neighborhood of faces around each vertex
