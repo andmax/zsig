@@ -48,6 +48,33 @@ public:
      */
     vec( const T& _s ) { *this = _s; }
 
+	/** Constructor from coordinate values
+	 *  @param _c0 Value coordinate
+	 *  @param _c1 Value coordinate
+	 */
+	vec( const T& _c0, const T& _c1 ) { if( D < 2 ) return;
+		this->coord[0] = _c0; this->coord[1] = _c1;
+	}
+
+	/** Constructor from coordinate values
+	 *  @param _c0 Value coordinate
+	 *  @param _c1 Value coordinate
+	 *  @param _c2 Value coordinate
+	 */
+	vec( const T& _c0, const T& _c1, const T& _c2 ) { if( D < 3 ) return;
+		this->coord[0] = _c0; this->coord[1] = _c1; this->coord[2] = _c2;
+	}
+
+	/** Constructor from coordinate values
+	 *  @param _c0 Value coordinate
+	 *  @param _c1 Value coordinate
+	 *  @param _c2 Value coordinate
+	 *  @param _c3 Value coordinate
+	 */
+	vec( const T& _c0, const T& _c1, const T& _c2, const T& _c3 ) { if( D < 4 ) return;
+		this->coord[0] = _c0; this->coord[1] = _c1; this->coord[2] = _c2; this->coord[3] = _c3;
+	}
+
     /// Destructor
     ~vec() { }
 
